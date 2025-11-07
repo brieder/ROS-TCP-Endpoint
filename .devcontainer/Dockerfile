@@ -32,14 +32,17 @@ RUN apt-get update && apt-get install -y \
 RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb \
     && dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
 
-# Cuda 12.9
+# cuda 12.1 (not 12.9) requires keyboard-configuration which tries to ask.
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Cuda 12.1
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
     && dpkg -i cuda-keyring_1.0-1_all.deb \
     && apt-get update && apt-get upgrade -y \
-    && sudo apt-get -y install cuda-12-9 \
+    && apt-get -y install cuda-12-1 \
     && rm -rf /var/lib/apt/lists/*
 #ENV PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}
-ENV PATH=/usr/local/cuda-12.9/bin:${PATH}
+ENV PATH=/usr/local/cuda-12.1/bin:${PATH}
 
 USER $USERNAME
 
@@ -75,8 +78,8 @@ RUN . $WORKROOT/miniconda3/bin/activate \
     && conda update -y -c conda-forge libstdcxx-ng \
     && conda install -y ruamel.yaml \ 
     && export PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}~ \
-    && bash ./build_all_conda.sh
-    #&& TORCH_CUDA_ARCH_LIST=8.9 bash ./build_all_conda.sh
+    #&& bash ./build_all_conda.sh
+    && TORCH_CUDA_ARCH_LIST=8.9 bash ./build_all_conda.sh
     #&& bash ./build_all_conda.sh
 
 # [Optional] Set the default user. Omit if you want to keep the default as root.

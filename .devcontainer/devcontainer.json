@@ -1,0 +1,24 @@
+{
+    "name": "Mini VDT Foundation Pose",
+    "remoteUser": "void",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "USERNAME": "void"
+        },
+        "context": "..",
+        "options": [
+            "--progress", "plain", 
+            "--secret", "id=PAT,src=.devcontainer/BUILDTOKEN"
+        ]
+    },
+    "containerEnv": {
+        "ROS_AUTOMATIC_DISCOVERY_RANGE": "SUBNET",
+        "ROS_DOMAIN_ID": "42"
+    },
+    "privileged": true,
+    "runArgs": [
+        "--gpus=all",
+        "--net=host"
+    ]
+}

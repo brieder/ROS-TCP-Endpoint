@@ -12,6 +12,13 @@
             "--secret", "id=PAT,src=.devcontainer/BUILDTOKEN"
         ]
     },
+    "customizations": {
+        "vscode": {
+            "extensions":[
+                "mutantdino.resourcemonitor"
+            ]
+        }
+    },
     "containerEnv": {
         "ROS_AUTOMATIC_DISCOVERY_RANGE": "SUBNET",
         "ROS_DOMAIN_ID": "42"

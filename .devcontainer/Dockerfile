@@ -1,4 +1,4 @@
-FROM ros:humble
+FROM ros:humble-perception 
 
 ARG USERNAME=USERNAME
 ARG USER_UID=1000
@@ -18,7 +18,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y libboost-all-dev python3-pip wget
+RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip wget
 
 ENV SHELL=/bin/bash
 
@@ -52,7 +52,13 @@ RUN --mount=type=secret,id=PAT \
     B64_TOKEN=$(printf "%s"":$TOKEN" | base64) && \
     git config --global --add http.extraHeader "Authorization: Basic ${B64_TOKEN}"
 
+    
 # Start doing things in the workspace...
+
+# rosdep init called by base for root but not $USERNAME.
+RUN rosdep fix-permissions && \
+    rosdep update --rosdistro $ROS_DISTRO
+
 
 # miniconda, -b batch mode, -u update existing
 WORKDIR $WORKROOT
@@ -61,26 +67,62 @@ RUN mkdir -p miniconda3 \
     && bash miniconda3/miniconda.sh -b -u -p miniconda3 \
     && rm miniconda3/miniconda.sh
 
-# Clone FoundationPoseROS2
+
+# uv
+# Download the latest installer
+ADD --chmod=700 --chown=void:void https://astral.sh/uv/install.sh "/home/$USERNAME/uv-installer.sh"
+# Run the installer then remove it
+RUN sh "/home/$USERNAME/uv-installer.sh" && rm "/home/$USERNAME/uv-installer.sh"
+# Ensure the installed binary is on the `PATH`
+ENV PATH="/home/$USERNAME/.local/bin/:$PATH"
+
+
+# # FoundationPoseROS2
+# WORKDIR $WORKROOT
+# RUN git clone -b void_tmp https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_foundationpose_ros
+
+# # Finish miniconda setup since we are activating and create the fp_ros env.
+# WORKDIR $WORKROOT/vdt_foundationpose_ros
+# RUN . $WORKROOT/miniconda3/bin/activate \
+#     && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
+#     && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r \
+#     && conda create -n foundationpose_ros python=3.10 -y
+
+# # And activate and build all of fp/fpros2.
+# RUN . $WORKROOT/miniconda3/bin/activate \
+#     && conda activate foundationpose_ros \
+#     && conda update -y -c conda-forge libstdcxx-ng \
+#     && conda install -y ruamel.yaml \ 
+#     && export PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}~ \
+#     #&& bash ./build_all_conda.sh
+#     && TORCH_CUDA_ARCH_LIST=8.9 bash ./build_all_conda.sh
+
+
+# happypose (has submodules) NOTE the branch: dev.
 WORKDIR $WORKROOT
-RUN git clone -b void_tmp https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_foundationpose_ros
+RUN git clone --branch dev --recursive https://github.com/agimus-project/happypose.git $WORKROOT/happypose
+#RUN git clone --branch dev https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose $WORKROOT/happypose
+WORKDIR $WORKROOT/happypose
+# uv install
+RUN uv venv --system-site-packages && \ 
+    uv sync --extra pypi --extra cu124 && \ 
+    mkdir -p $WORKROOT/happypose_data
+ENV HAPPYPOSE_DATA_DIR="$WORKROOT/happypose_data"
 
-# Finish miniconda setup since we are activating and create the fp_ros env.
-WORKDIR $WORKROOT/vdt_foundationpose_ros
-RUN . $WORKROOT/miniconda3/bin/activate \
-    && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
-    && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r \
-    && conda create -n foundationpose_ros python=3.10 -y
 
-# And activate and build all of fp/fpros2.
-RUN . $WORKROOT/miniconda3/bin/activate \
-    && conda activate foundationpose_ros \
-    && conda update -y -c conda-forge libstdcxx-ng \
-    && conda install -y ruamel.yaml \ 
-    && export PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}~ \
-    #&& bash ./build_all_conda.sh
-    && TORCH_CUDA_ARCH_LIST=8.9 bash ./build_all_conda.sh
-    #&& bash ./build_all_conda.sh
+# happypose_ros (no submodules)
+WORKDIR $WORKROOT
+RUN git clone https://github.com/agimus-project/happypose_ros $WORKROOT/happypose_ros/
+#RUN git clone https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
+WORKDIR $WORKROOT/happypose_ros
+RUN sudo apt-get update && \
+    . $WORKROOT/happypose/.venv/bin/activate && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    sudo rm -rf /var/lib/apt/lists/*
+RUN . $WORKROOT/happypose/.venv/bin/activate && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --symlink-install
 
-# [Optional] Set the default user. Omit if you want to keep the default as root.
+
 CMD ["/bin/bash"]

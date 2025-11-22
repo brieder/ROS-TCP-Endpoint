@@ -11,6 +11,8 @@ RUN if id -u $USER_UID ; then userdel `id -un $USER_UID` ; fi
 # Create the user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    # /dev/video access
+    && usermod -a -G video $USERNAME \
     && apt-get update \
     && apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
@@ -44,6 +46,9 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86
 #ENV PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}
 ENV PATH=/usr/local/cuda-12.1/bin:${PATH}
 
+#ENV NVIDIA_VISIBLE_DEVICES=all
+#ENV NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility
+
 USER $USERNAME
 
 # Azure PAT workaround because git lfs over ssh is broken on Azure.
@@ -65,7 +70,10 @@ WORKDIR $WORKROOT
 RUN mkdir -p miniconda3 \
     && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda3/miniconda.sh \
     && bash miniconda3/miniconda.sh -b -u -p miniconda3 \
-    && rm miniconda3/miniconda.sh
+    && rm miniconda3/miniconda.sh \
+    && . $WORKROOT/miniconda3/bin/activate \
+    && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main \
+    && conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 
 
 # uv
@@ -103,10 +111,22 @@ WORKDIR $WORKROOT
 RUN git clone --branch dev --recursive https://github.com/agimus-project/happypose.git $WORKROOT/happypose
 #RUN git clone --branch dev https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose $WORKROOT/happypose
 WORKDIR $WORKROOT/happypose
+
 # uv install
-RUN uv venv --system-site-packages && \ 
-    uv sync --extra pypi --extra cu124 && \ 
-    mkdir -p $WORKROOT/happypose_data
+#RUN uv venv —-seed --system-site-packages && \ 
+# RUN uv venv --seed && \ 
+#     uv sync --extra pypi --extra cu124
+
+# OR
+RUN . $WORKROOT/miniconda3/bin/activate \
+    && conda create --name happypose python=3.10 \
+    && conda env update --file environment.yml \
+    && conda activate happypose \
+    && pip install -r requirements/base.txt \
+    && pip install catkin_pkg empy==3.3.4 lark
+
+#RUN mkdir -p $WORKROOT/happypose_data
+COPY --chown=void:void happypose_data $WORKROOT/happypose_data
 ENV HAPPYPOSE_DATA_DIR="$WORKROOT/happypose_data"
 
 
@@ -114,13 +134,17 @@ ENV HAPPYPOSE_DATA_DIR="$WORKROOT/happypose_data"
 WORKDIR $WORKROOT
 RUN git clone https://github.com/agimus-project/happypose_ros $WORKROOT/happypose_ros/
 #RUN git clone https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
+
 WORKDIR $WORKROOT/happypose_ros
-RUN sudo apt-get update && \
-    . $WORKROOT/happypose/.venv/bin/activate && \
+#. $WORKROOT/happypose/.venv/bin/activate && \ # uv
+RUN . $WORKROOT/miniconda3/bin/activate && \
+    conda activate happypose && \
     . /opt/ros/$ROS_DISTRO/setup.sh && \
+    sudo apt-get update && \
     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
     sudo rm -rf /var/lib/apt/lists/*
-RUN . $WORKROOT/happypose/.venv/bin/activate && \
+RUN . $WORKROOT/miniconda3/bin/activate && \
+    conda activate happypose && \
     . /opt/ros/$ROS_DISTRO/setup.sh && \
     colcon build --symlink-install
 

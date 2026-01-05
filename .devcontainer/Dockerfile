@@ -46,8 +46,8 @@ RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86
 #ENV PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}
 ENV PATH=/usr/local/cuda-12.1/bin:${PATH}
 
-#ENV NVIDIA_VISIBLE_DEVICES=all
-#ENV NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility
 
 USER $USERNAME
 

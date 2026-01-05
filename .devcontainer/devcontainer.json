@@ -26,6 +26,7 @@
     "privileged": true,
     "runArgs": [
         "--gpus=all",
-        "--net=host"
+        "--net=host",
+        "--privileged"
     ]
 }

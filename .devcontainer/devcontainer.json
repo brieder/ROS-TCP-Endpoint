@@ -15,7 +15,8 @@
     "customizations": {
         "vscode": {
             "extensions":[
-                "mutantdino.resourcemonitor"
+                "mutantdino.resourcemonitor",
+                "Ranch-Hand-Robotics.rde-pack"
             ]
         }
     },

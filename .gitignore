@@ -1,1 +1,10 @@
+.vscode/
 happypose_data/
+install/
+test/
+
+apriltag_ros/
+happypose_ros/
+ros2_ws/
+
+BUILDTOKEN

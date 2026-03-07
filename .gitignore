@@ -1,7 +1,11 @@
 .vscode/
+build/
 happypose_data/
 install/
+log/
 test/
+
+rosbag*/
 
 apriltag_ros/
 happypose_ros/

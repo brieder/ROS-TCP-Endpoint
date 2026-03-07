@@ -1,6 +1,7 @@
 FROM ros:humble-perception 
 
-ARG USERNAME=USERNAME
+#ARG USERNAME=USERNAME
+ARG USERNAME=void
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 ARG WORKROOT=/home/void
@@ -27,26 +28,32 @@ ENV SHELL=/bin/bash
 # realsense2 and other deps.
 RUN apt-get update && apt-get install -y \
     ros-$ROS_DISTRO-apriltag-ros \
+    ros-$ROS_DISTRO-camera-calibration \    
     ros-$ROS_DISTRO-librealsense2 \
     ros-$ROS_DISTRO-realsense2-* \
+    ros-$ROS_DISTRO-rosbridge-suite \
     ros-${ROS_DISTRO}-web-video-server \
     && rm -rf /var/lib/apt/lists/*
 
-# Need libssl1.1.1 for Cuda (which got removed)
-RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb \
-    && dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
 
-# cuda 12.1 (not 12.9) requires keyboard-configuration which tries to ask.
-ENV DEBIAN_FRONTEND=noninteractive
+# CUDA
 
-# Cuda 12.1
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
-    && dpkg -i cuda-keyring_1.0-1_all.deb \
-    && apt-get update && apt-get upgrade -y \
-    && apt-get -y install cuda-12-6 \
-    && rm -rf /var/lib/apt/lists/*
-#ENV PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}
-ENV PATH=/usr/local/cuda-12.6/bin:${PATH}
+# # Need libssl1.1.1 for Cuda (which got removed)
+# RUN wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb \
+#     && dpkg -i libssl1.1_1.1.1f-1ubuntu2.24_amd64.deb
+
+# # cuda 12.1 (not 12.9) requires keyboard-configuration which tries to ask.
+# ENV DEBIAN_FRONTEND=noninteractive
+
+# # Cuda 12.1
+# RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+#     && dpkg -i cuda-keyring_1.0-1_all.deb \
+#     && apt-get update && apt-get upgrade -y \
+#     && apt-get -y install cuda-12-6 \
+#     && rm -rf /var/lib/apt/lists/*
+# #ENV PATH=/usr/local/cuda-12.9/bin${PATH:+:${PATH}}
+# ENV PATH=/usr/local/cuda-12.6/bin:${PATH}
+
 
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,graphics,utility
@@ -198,4 +205,8 @@ RUN . $WORKROOT/miniconda3/bin/activate && \
     colcon build --symlink-install
 
 
-CMD ["/bin/bash"]
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc
+
+
+CMD [ "sleep", "infinity" ]
+#CMD ["/bin/bash"]

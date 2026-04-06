@@ -24,7 +24,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip python3-venv unzip wget
+RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip python3-venv tmux unzip wget
 
 ENV SHELL=/bin/bash
 
@@ -257,7 +257,6 @@ RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
     # build
     colcon build --symlink-install
 
-
 #
 # .bashrc
 # 
@@ -267,5 +266,6 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc && \
 
 # GO
 
-CMD [ "sleep", "infinity" ]
-#CMD ["/bin/bash"]
+WORKDIR /workspaces/vdt
+#CMD [ "sleep", "infinity" ]
+CMD ["/bin/bash"]

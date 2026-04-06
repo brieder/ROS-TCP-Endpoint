@@ -1,0 +1,99 @@
+/**:
+  ros__parameters:
+    # Device to which the models will be loaded. Supported options are 'cpu', 'cuda', and 'cuda:x' where 'x' is the GPU number.
+    device: cuda:0
+    # Publish detected objects as markers to visualize detections in RViz
+    visualization.publish_markers: true
+    # Extended verbosity on info logs. Show logs with number of detections and more
+    verbose_info_logs: false
+    # Which image time stamp to use in final detection message
+    time_stamp_strategy: "newest"
+    # Specifies whether to use depth images for pose refinement. If set to `true` all cameras are expected to provide depth images
+    use_depth: false
+    # Specifies which pose estimator to use in the pipeline
+    pose_estimator_type: "cosypose"
+    voxelpose:
+      config_file: "/workspaces/vdt/configs/voxelpose_config.yaml"
+      detector_file: "/workspaces/vdt/vdt_Faster-VoxelPose/void/pose_resnet50_panoptic.pth.tar"
+      pose_file: "/workspaces/vdt/vdt_Faster-VoxelPose/void/panoptic_model_best.pth.tar"
+      # Name of BOP dataset, used to load specific weights and object models
+      dataset_name: "ycbv"
+      # Type of neural network model to use. Available 'pbr'|'synth+real'
+      model_type: "pbr"
+      # Object renderer parameters
+      renderer:
+        # Specifies which renderer to use in the pipeline
+        renderer_type: "panda3d"
+        # Number of CPU cores to use during rendering
+        n_workers: 8
+        # Use antialiasing in the rendering process. Slower and does not increase much performance. Only for panda3d. Enabled by default for backwards compatibility.
+        use_antialiasing: true
+      # Parameters expected on the runtime
+      inference:
+        # 2D image detection parameters
+        detector:
+          # Detection threshold of an object used by detector
+          detection_th: 0.7
+        # 3D pose estimation parameters
+        pose_estimator:
+          # Number of iterations for the refiner
+          n_coarse_iterations: 1
+          # Number of iterations for the coarse estimate
+          n_refiner_iterations: 3
+          # Labels of detected objects to keep. If not specyfied, all objects are kept
+          # labels_to_keep:
+          #   - "ycbv-obj_000001"
+        icp:
+          # Minimum number of matching depth points to consider detection valid
+          n_min_points: 1000
+          # Minimum clipping distance of depth point from the camera to be considered valid
+          min_measured_depth: 0.2
+          # Maximum clipping distance of depth point from the camera to be considered valid
+          max_measured_depth: 5.0
+          # Number of iterations of ICP algorithm
+          iterations: 100
+          # Tells the algorithm to stop when the norm of the error vector makes less improvement in percent,
+          # than tolerance value. The error function is the norm of the difference of the matched 3D points
+          tolerance: 0.05
+          # Robust outlier rejection is applied for robustness.
+          # This value actually corresponds to the standard deviation coefficient.
+          # Points with rejectionScale * &sigma are ignored during registration
+          rejection_scale: 2.5
+          # Corresponds to iterative ICP, where the original point cloud is subsampled.
+          # Note that if the output of CosyPose is considered good, ``num_levels`` does not have to be high
+          num_levels: 4
+    # List of camera names to subscribe to. Those names are internal to happypose_ros node
+    # and can be chosen arbitrarily as long as they are valid YAML keys to be used later
+    camera_names: ["camera_814412071982", "camera_829212072304", "camera_829212072337", "camera_843112071706"]
+    cameras:
+      # Timeout, after which a frame from a camera is considered too old. Value '0.0' disables timeout
+      timeout: 0.0
+      # Minimum number of valid camera views to start pose estimation pipeline
+      n_min_cameras: 4
+      # Configuration of camera "cam_1" defined in "camera_names" param
+      camera_814412071982:
+        # Consider the camera to be leading. If a camera is leading, its frame_id is used as a reference.
+        # Only one camera can be leading, and it can't publish TF at the same time
+        leading: true
+        # Publish TF of a given camera relative to the leading camera
+        publish_tf: false
+        # Expect compressed image messages from given camera
+        compressed: false
+        # Delay [seconds] with which incoming messages can be synchronized.
+        # Value corresponds to synchronization of messages at 23 Hz.
+        time_sync_slop: 0.04
+      camera_8829212072304:
+        leading: false
+        publish_tf: false
+        compressed: false
+        time_sync_slop: 0.04
+      camera_8829212072337:
+        leading: false
+        publish_tf: false
+        compressed: false
+        time_sync_slop: 0.04
+      camera_843112071706:
+        leading: false
+        publish_tf: false
+        compressed: false
+        time_sync_slop: 0.04

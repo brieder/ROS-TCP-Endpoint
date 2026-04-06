@@ -11,4 +11,6 @@ apriltag_ros/
 happypose_ros/
 ros2_ws/
 
+__pycache__
+
 BUILDTOKEN

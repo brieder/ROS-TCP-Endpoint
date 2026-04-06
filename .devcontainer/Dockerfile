@@ -17,21 +17,28 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && apt-get update \
     && apt-get install -y sudo \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    # FLIR
+    && addgroup flirimaging \
+    && usermod -a -G flirimaging $USERNAME
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip unzip wget
+RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip python3-venv unzip wget
 
 ENV SHELL=/bin/bash
 
-# realsense2 and other deps.
+# ros packages
 RUN apt-get update && apt-get install -y \
     ros-$ROS_DISTRO-apriltag-ros \
     ros-$ROS_DISTRO-camera-calibration \    
+    ros-$ROS_DISTRO-foxglove-bridge \
     ros-$ROS_DISTRO-librealsense2 \
     ros-$ROS_DISTRO-realsense2-* \
     ros-$ROS_DISTRO-rosbridge-suite \
+    ros-$ROS_DISTRO-spinnaker-camera-driver \
+    ros-$ROS_DISTRO-tf-transformations \
+    ros-$ROS_DISTRO-usb-cam \
     ros-${ROS_DISTRO}-web-video-server \
     && rm -rf /var/lib/apt/lists/*
 
@@ -69,9 +76,25 @@ RUN --mount=type=secret,id=PAT \
     
 # Start doing things in the workspace...
 
+# XXX pip installs added here for now
+# pyudev for serial/device matching in py launch files.
+
 # rosdep init called by base for root but not $USERNAME.
 RUN rosdep fix-permissions && \
-    rosdep update --rosdistro $ROS_DISTRO
+    rosdep update --rosdistro $ROS_DISTRO && \ 
+    pip install pyudev
+
+#
+# Unity ROS-TCP-Endpoint
+#
+WORKDIR $WORKROOT
+RUN git clone https://github.com/Unity-Technologies/ROS-TCP-Endpoint
+WORKDIR $WORKROOT/ROS-TCP-Endpoint
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    sudo apt-get update && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    colcon build --symlink-install \
+    sudo rm -rf /var/lib/apt/lists/*
 
 #
 # miniconda
@@ -185,8 +208,8 @@ ENV HAPPYPOSE_DATA_DIR="$WORKROOT/happypose_data"
 
 # happypose_ros (no submodules)
 WORKDIR $WORKROOT
-RUN git clone https://github.com/agimus-project/happypose_ros $WORKROOT/happypose_ros/
-#RUN git clone https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
+#RUN git clone https://github.com/agimus-project/happypose_ros $WORKROOT/happypose_ros/
+RUN git clone https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
 
 WORKDIR $WORKROOT/happypose_ros
 
@@ -205,8 +228,36 @@ RUN . $WORKROOT/miniconda3/bin/activate && \
     colcon build --symlink-install
 
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc
+#
+# fastervoxelpose
+#
 
+WORKDIR $WORKROOT
+RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_fastervoxelpose fastervoxelpose
+WORKDIR $WORKROOT/fastervoxelpose
+RUN python3 -m venv venv && \
+    pip install -r void\requirements.live.txt
+
+#
+# fastervoxelpose_ros
+#
+
+WORKDIR $WORKROOT
+RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_voxelpose_ros voxelpose_ros
+WORKDIR $WORKROOT/voxelpose_ros
+RUN . venv/bin/activate && \
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --symlink-install
+
+
+#
+# .bashrc
+# 
+
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc && \
+    echo "export SPINNAKER_GENTL64_CTI=/opt/ros/${ROS_DISTRO}/lib/spinnaker-gentl/Spinnaker_GenTL.cti" >> /home/$USERNAME/.bashrc
+
+# GO
 
 CMD [ "sleep", "infinity" ]
 #CMD ["/bin/bash"]

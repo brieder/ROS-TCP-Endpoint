@@ -1,5 +1,5 @@
 {
-    "name": "Mini VDT Foundation Pose",
+    "name": "VDT 2",
     "remoteUser": "void",
     "build": {
         "dockerfile": "Dockerfile",
@@ -29,5 +29,8 @@
         "--gpus=all",
         "--net=host",
         "--privileged"
+    ],
+   "mounts": [
+        "source=/run/udev,target=/run/udev,type=bind,readonly"
     ]
 }

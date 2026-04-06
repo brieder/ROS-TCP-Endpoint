@@ -88,12 +88,12 @@ RUN rosdep fix-permissions && \
 # Unity ROS-TCP-Endpoint
 #
 WORKDIR $WORKROOT
-RUN git clone https://github.com/Unity-Technologies/ROS-TCP-Endpoint
+RUN git clone -b main-ros2 https://github.com/Unity-Technologies/ROS-TCP-Endpoint
 WORKDIR $WORKROOT/ROS-TCP-Endpoint
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     sudo apt-get update && \
     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
-    colcon build --symlink-install \
+    colcon build --symlink-install && \
     sudo rm -rf /var/lib/apt/lists/*
 
 #
@@ -235,8 +235,10 @@ RUN . $WORKROOT/miniconda3/bin/activate && \
 WORKDIR $WORKROOT
 RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_fastervoxelpose fastervoxelpose
 WORKDIR $WORKROOT/fastervoxelpose
-RUN python3 -m venv venv && \
-    pip install -r void\requirements.live.txt
+RUN python3 -m venv --prompt voxelpose venv && \
+    # create and activate venv
+    . venv/bin/activate && \
+    pip install -r void/requirements.live.txt
 
 #
 # fastervoxelpose_ros
@@ -245,8 +247,14 @@ RUN python3 -m venv venv && \
 WORKDIR $WORKROOT
 RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_voxelpose_ros voxelpose_ros
 WORKDIR $WORKROOT/voxelpose_ros
-RUN . venv/bin/activate && \
+RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
+    # source vp venv and redo ros setup
     . /opt/ros/$ROS_DISTRO/setup.sh && \
+    # rosdep
+    sudo apt-get update && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    sudo rm -rf /var/lib/apt/lists/* && \
+    # build
     colcon build --symlink-install
 
 

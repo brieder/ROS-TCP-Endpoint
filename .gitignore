@@ -1,5 +1,6 @@
 .vscode/
 build/
+data/
 happypose_data/
 install/
 log/
@@ -14,3 +15,6 @@ ros2_ws/
 __pycache__
 
 BUILDTOKEN
+
+*.ts
+*.pid

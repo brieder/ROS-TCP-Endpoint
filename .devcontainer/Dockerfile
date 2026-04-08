@@ -24,7 +24,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ca-certificates curl libboost-all-dev python3-pip python3-venv tmux unzip wget
+RUN apt-get install -y ca-certificates curl libboost-all-dev nano python3-pip python3-venv tmux unzip vim wget
 
 ENV SHELL=/bin/bash
 
@@ -199,8 +199,8 @@ RUN . $WORKROOT/miniconda3/bin/activate \
 #
 
 #RUN mkdir -p $WORKROOT/happypose_data
-COPY --chown=void:void happypose_data $WORKROOT/happypose_data
-ENV HAPPYPOSE_DATA_DIR="$WORKROOT/happypose_data"
+#COPY --chown=void:void happypose_data $WORKROOT/happypose_data
+ENV HAPPYPOSE_DATA_DIR="$WORKROOT/data/happypose"
 
 #
 # happypose_ros
@@ -238,7 +238,8 @@ WORKDIR $WORKROOT/fastervoxelpose
 RUN python3 -m venv --prompt voxelpose venv && \
     # create and activate venv
     . venv/bin/activate && \
-    pip install -r void/requirements.live.txt
+    pip install -r void/requirements.live.txt && \
+    pip install -e .
 
 #
 # fastervoxelpose_ros
@@ -255,7 +256,7 @@ RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
     sudo rm -rf /var/lib/apt/lists/* && \
     # build
-    colcon build --symlink-install
+    colcon build
 
 #
 # .bashrc
@@ -267,5 +268,5 @@ RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc && \
 # GO
 
 WORKDIR /workspaces/vdt
-#CMD [ "sleep", "infinity" ]
-CMD ["/bin/bash"]
+CMD [ "sleep", "infinity" ]
+#CMD ["/bin/bash"]

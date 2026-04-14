@@ -19,7 +19,8 @@ def launch_setup(
     # Realsense
     apriltag_nodes = []
     for cam_serial in camera_serials:
-        tag_frame_str = f'camera_{cam_serial}:14'
+        camera_name = f'C{cam_serial}'
+        tag_frame_str = f'{camera_name}:14'
         apriltag_nodes.append(
             Node(
                 package='apriltag_ros', 
@@ -32,8 +33,8 @@ def launch_setup(
                             }
                 ],
                 remappings=[
-                            ('image_rect', f'camera_{cam_serial}/color/image_raw'),
-                            ('camera_info', f'camera_{cam_serial}/color/camera_info'),
+                            ('image_rect', f'/{camera_name}/color/image_raw'),
+                            ('camera_info', f'/{camera_name}/color/camera_info'),
                             ('detections', 'apriltag_detections')
                 ]
             ) # Node

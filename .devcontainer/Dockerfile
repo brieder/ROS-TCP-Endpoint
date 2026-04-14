@@ -24,7 +24,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ca-certificates curl libboost-all-dev nano python3-pip python3-venv tmux unzip vim wget
+RUN apt-get install -y ca-certificates curl libboost-all-dev nano python3-pip python3-prettytable python3-venv tmux unzip vim wget
 
 ENV SHELL=/bin/bash
 
@@ -87,6 +87,7 @@ RUN rosdep fix-permissions && \
 #
 # Unity ROS-TCP-Endpoint
 #
+
 WORKDIR $WORKROOT
 RUN git clone -b main-ros2 https://github.com/Unity-Technologies/ROS-TCP-Endpoint
 WORKDIR $WORKROOT/ROS-TCP-Endpoint
@@ -257,6 +258,25 @@ RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
     sudo rm -rf /var/lib/apt/lists/* && \
     # build
     colcon build
+
+#
+# Extrinsic Calbirator
+# Env: Use VP's venv because the systems numpy 2.x borks this.
+#
+
+WORKDIR $WORKROOT
+RUN git clone -b tmp https://github.com/brieder/extrinsic_calibrator
+WORKDIR $WORKROOT/extrinsic_calibrator
+RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
+    # source vp venv and redo ros setup
+    . /opt/ros/$ROS_DISTRO/setup.sh && \
+    # rosdep
+    sudo apt-get update && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    sudo rm -rf /var/lib/apt/lists/* && \
+    # build
+    colcon build
+
 
 #
 # .bashrc

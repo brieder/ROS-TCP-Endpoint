@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    aruco_dict: "DICT_APRILTAG_36h11"
+    marker_length: 0.5
+    reference_marker: 14
+    frame_averaging: True
+    frame_averaging_queue_size: 14
+    position_threshold: 0.02
+    rotation_threshold: 10.0
+    cameras:
+      C814412071982:
+        image_topic: "/C814412071982/color/image_raw"
+        camera_info_topic: "/C814412071982/color/camera_info"
+      C829212072304:
+        image_topic: "/C829212072304/color/image_raw"
+        camera_info_topic: "/C829212072304/color/camera_info"
+      C829212072337:
+        image_topic: "/C829212072337/color/image_raw"
+        camera_info_topic: "/C829212072337/color/camera_info"
+      C843112071706:
+        image_topic: "/C843112071706/color/image_raw"
+        camera_info_topic: "/C843112071706/color/camera_info"
+

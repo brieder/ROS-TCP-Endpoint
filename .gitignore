@@ -11,6 +11,10 @@ rosbag*/
 apriltag_ros/
 happypose_ros/
 ros2_ws/
+extrinsic_calibrator/
+Pangolin/
+vdt_Faster-VoxelPose/
+voxelpose_ros/
 
 __pycache__
 
@@ -18,3 +22,4 @@ BUILDTOKEN
 
 *.ts
 *.pid
+*.png

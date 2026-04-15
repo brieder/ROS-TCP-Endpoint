@@ -54,6 +54,11 @@ def launch_setup(
                 ] # parameters
             ) # Node
         ) # append
+
+        if enable_infra1:
+            child_frame = f'{camera_name}_infra1_optical_frame'
+        else:
+            child_frame = f'{camera_name}_color_optical_frame'
         rs_nodes.append(
             Node(
                 package="tf2_ros",
@@ -63,7 +68,7 @@ def launch_setup(
                     # "--roll", "-1.57",
                     # "--yaw", "-1.57",
                     "--frame-id", camera_name,
-                    "--child-frame-id", f'{camera_name}_color_optical_frame',
+                    "--child-frame-id", child_frame,
                 ],
             ) # Node
         ) # append

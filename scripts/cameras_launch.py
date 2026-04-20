@@ -19,7 +19,6 @@ def launch_setup(
     rs_infra_profile = LaunchConfiguration("rs_infra_profile")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
     rs_serials = eval(LaunchConfiguration("rs_serials").perform(context))
-
     usb_serials = eval(LaunchConfiguration("usb_serials").perform(context))
 
     # Realsense
@@ -55,10 +54,11 @@ def launch_setup(
             ) # Node
         ) # append
 
-        if enable_infra1:
+        if enable_infra1 is True:
             child_frame = f'{camera_name}_infra1_optical_frame'
         else:
             child_frame = f'{camera_name}_color_optical_frame'
+
         rs_nodes.append(
             Node(
                 package="tf2_ros",

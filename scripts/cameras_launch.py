@@ -17,6 +17,8 @@ def launch_setup(
     enable_color = LaunchConfiguration("enable_color")
     enable_infra1 = LaunchConfiguration("enable_infra1")
     rs_infra_profile = LaunchConfiguration("rs_infra_profile")
+    rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
+    rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
     rs_serials = eval(LaunchConfiguration("rs_serials").perform(context))
     usb_serials = eval(LaunchConfiguration("usb_serials").perform(context))
@@ -38,6 +40,9 @@ def launch_setup(
                                 #'tf_prefix': f'camera_{rs_serial}/', # doesn't work, ros1 only?
                                 'depth_module.infra_profile': rs_infra_profile,
                                 'rgb_camera.color_profile': rs_rgb_profile,
+                                'rgb_camera.auto_exposure_priority': False,
+                                'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
+                                'rgb_camera.exposure': rs_rgb_exposure,
                                 'enable_color': enable_color,
                                 'enable_depth': False,
                                 'enable_infra1': enable_infra1,
@@ -117,6 +122,16 @@ def generate_launch_description():
             "rs_infra_profile",
             default_value="1280x800x30",
             description="Realsense RGB Color Profile.",
+        ),
+        DeclareLaunchArgument(
+            "rs_rgb_enable_ae",
+            default_value="True",
+            description="Realsense Enable RGB Auto Exposure",
+        ),
+        DeclareLaunchArgument(
+            "rs_rgb_exposure",
+            default_value="156",
+            description="Realsense RGB Exposure",
         ),
         DeclareLaunchArgument(
             "rs_rgb_profile",

@@ -9,19 +9,25 @@ from launch.launch_description_entity import LaunchDescriptionEntity
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
-import pyudev
+import pyudev # usb serials
+import yaml
 
 def launch_setup(
     context: LaunchContext, *args, **kwargs
 ) -> list[LaunchDescriptionEntity]:
-    enable_color = LaunchConfiguration("enable_color")
-    enable_infra1 = LaunchConfiguration("enable_infra1")
+    cameras_file = LaunchConfiguration("cameras_file")
+    rs_enable_color = LaunchConfiguration("rs_enable_color")
+    rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
     rs_infra_profile = LaunchConfiguration("rs_infra_profile")
     rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
     rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
-    rs_serials = eval(LaunchConfiguration("rs_serials").perform(context))
+    #rs_serials = eval(LaunchConfiguration("rs_serials").perform(context))
     usb_serials = eval(LaunchConfiguration("usb_serials").perform(context))
+
+    cameras_file = LaunchConfiguration("cameras_file")
+    with open(cameras_file.perform(context), 'r') as file:
+        rs_serials = yaml.safe_load(file)    
 
     # Realsense
     rs_nodes = []
@@ -43,9 +49,9 @@ def launch_setup(
                                 'rgb_camera.auto_exposure_priority': False,
                                 'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
                                 'rgb_camera.exposure': rs_rgb_exposure,
-                                'enable_color': enable_color,
+                                'enable_color': rs_enable_color,
                                 'enable_depth': False,
-                                'enable_infra1': enable_infra1,
+                                'enable_infra1': rs_enable_infra1,
                                 'enable_infra2': False,
                                 'enable_gyro': False,
                                 'enable_accel': False,
@@ -59,7 +65,7 @@ def launch_setup(
             ) # Node
         ) # append
 
-        if enable_infra1 is True:
+        if rs_enable_infra1.perform(context) == "True":
             child_frame = f'{camera_name}_infra1_optical_frame'
         else:
             child_frame = f'{camera_name}_color_optical_frame'
@@ -109,14 +115,19 @@ def launch_setup(
 def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument(
-            "enable_color",
-            default_value="True",
-            description="Enable color stream",
+            "cameras_file",
+            default_value="cameras.yaml",
+            description="Yaml file full of cameras.",
         ),
         DeclareLaunchArgument(
-            "enable_infra1",
+            "rs_enable_color",
+            default_value="True",
+            description="Realsense Enable color stream",
+        ),
+        DeclareLaunchArgument(
+            "rs_enable_infra1",
             default_value="False",
-            description="Enable infra1 stream",
+            description="Realsense Enable infra1 stream",
         ),
         DeclareLaunchArgument(
             "rs_infra_profile",
@@ -135,7 +146,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "rs_rgb_profile",
-            default_value="640x480x30",
+            default_value="960x540x60",
             description="Realsense RGB Color Profile.",
         ),
         DeclareLaunchArgument(
@@ -146,7 +157,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             "usb_serials",
             default_value="[]",
-            description="List of Realsense serials.",
+            description="List of USB serials.",
         ),
     ]
 

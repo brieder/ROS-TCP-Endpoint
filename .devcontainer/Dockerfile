@@ -82,7 +82,7 @@ RUN --mount=type=secret,id=PAT \
 # rosdep init called by base for root but not $USERNAME.
 RUN rosdep fix-permissions && \
     rosdep update --rosdistro $ROS_DISTRO && \ 
-    pip install pyudev
+    pip install parse pyudev
 
 #
 # Unity ROS-TCP-Endpoint

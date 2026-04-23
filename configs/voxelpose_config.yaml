@@ -12,7 +12,7 @@ GESTURES_TASK_PATH: 'void/gesture_recognizer.task'
 
 POSE:
   EXPIRE_SECS: 1
-  MIN_SCORE: 0.6
+  MIN_SCORE: 0.5
   NECK_DIFF_THRESHOLD: 0.4 # m
   SIMULARITY_THRESHOLD: 0.5 # 0-1.0
   SIMULARITY_IOU_THRESHOLD: 3 # num keypoints
@@ -44,8 +44,8 @@ DATASET:
 
 POSE_FILTERING:
   ENABLED: True
-  BETA: 0.05
-  FCMIN: 1.0
+  BETA: 0.1  # Orig: 0.05
+  FCMIN: 1.0  # Orig: 1.0
 
 RS:
   EXPOSURE: 0 # 0: auto, 75, 156, 312 - 30fps, 625 - 15fps, 1250 - 8fps, 2500 - 4fps, 5000 - 2fps

@@ -64,14 +64,14 @@
           num_levels: 4
     # List of camera names to subscribe to. Those names are internal to happypose_ros node
     # and can be chosen arbitrarily as long as they are valid YAML keys to be used later
-    camera_names: ["camera_814412071982", "camera_829212072304", "camera_829212072337", "camera_843112071706"]
+    camera_names: ["C814412071982", "C829212072304", "C829212072337", "C843112071706"]
     cameras:
       # Timeout, after which a frame from a camera is considered too old. Value '0.0' disables timeout
       timeout: 0.0
       # Minimum number of valid camera views to start pose estimation pipeline
       n_min_cameras: 4
       # Configuration of camera "cam_1" defined in "camera_names" param
-      camera_814412071982:
+      C814412071982:
         # Consider the camera to be leading. If a camera is leading, its frame_id is used as a reference.
         # Only one camera can be leading, and it can't publish TF at the same time
         leading: true
@@ -82,17 +82,17 @@
         # Delay [seconds] with which incoming messages can be synchronized.
         # Value corresponds to synchronization of messages at 23 Hz.
         time_sync_slop: 0.04
-      camera_8829212072304:
+      C829212072304:
         leading: false
         publish_tf: false
         compressed: false
         time_sync_slop: 0.04
-      camera_8829212072337:
+      C829212072337:
         leading: false
         publish_tf: false
         compressed: false
         time_sync_slop: 0.04
-      camera_843112071706:
+      C843112071706:
         leading: false
         publish_tf: false
         compressed: false

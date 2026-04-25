@@ -4,6 +4,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     OpaqueFunction,
 )
+from launch.conditions import IfCondition
 from launch.launch_context import LaunchContext
 from launch.launch_description_entity import LaunchDescriptionEntity
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -17,6 +18,7 @@ def launch_setup(
     context: LaunchContext, *args, **kwargs
 ) -> list[LaunchDescriptionEntity]:
 
+    enable_voxelpose = LaunchConfiguration("enable_voxelpose")
     use_infrared = LaunchConfiguration("rs_enable_infra1").perform(context) # string
     rs_infra_profile = LaunchConfiguration("rs_infra_profile").perform(context)
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile").perform(context)
@@ -145,13 +147,14 @@ def launch_setup(
 
     # voxelpose
     voxelpose_node = Node(
+        condition=IfCondition(enable_voxelpose),
         package="voxelpose_ros",
         executable="voxelpose_node",
         name="voxelpose_node",
         parameters=[voxelpose_params_path_procd],
     )
 
-    return [cameras_launch, foxbridge_node, tcp_node, extrinsics_node]
+    return [cameras_launch, foxbridge_node, tcp_node, extrinsics_node, voxelpose_node]
 
 def generate_launch_description():
     declared_arguments = [
@@ -170,6 +173,11 @@ def generate_launch_description():
             "voxelpose_params_path",
             default_value="./configs/voxelpose_params.yaml",
             description="Path to a file containing voxelpose node parameters.",
+        ),
+        DeclareLaunchArgument(
+            "enable_voxelpose",
+            default_value="True",
+            description="Run Voxelpose or not.",
         ),
 
         # Cameras Launch

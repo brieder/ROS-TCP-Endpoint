@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # fox and tcp: voxelpose msgs
-#source /home/void/voxelpose_ros/install/setup.bash
-source /workspaces/vdt/voxelpose_ros/install/setup.bash
+source /home/void/voxelpose_ros/install/setup.bash
+#source /workspaces/vdt/voxelpose_ros/install/setup.bash
 
 # tcp
 source /home/void/ROS-TCP-Endpoint/install/setup.bash

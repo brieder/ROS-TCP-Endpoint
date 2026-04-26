@@ -14,8 +14,8 @@
     pose_estimator_type: "cosypose"
     voxelpose:
       config_file: "/workspaces/vdt/configs/voxelpose_config.yaml"
-      detector_file: "/workspaces/vdt/vdt_Faster-VoxelPose/void/pose_resnet50_panoptic.pth.tar"
-      pose_file: "/workspaces/vdt/vdt_Faster-VoxelPose/void/panoptic_model_best.pth.tar"
+      detector_file: "/workspaces/vdt/data/voxelpose/models/pose_resnet50_panoptic.pth.tar"
+      pose_file: "/workspaces/vdt/data/voxelpose/models/panoptic_model_best.pth.tar"
       # Name of BOP dataset, used to load specific weights and object models
       dataset_name: "ycbv"
       # Type of neural network model to use. Available 'pbr'|'synth+real'

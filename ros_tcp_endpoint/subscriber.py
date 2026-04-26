@@ -45,6 +45,11 @@ class RosSubscriber(RosReceiver):
 
         qos_profile = QoSProfile(depth=queue_size)
 
+        # hack to allow tf_static in TFTopics on the other end.
+        if topic == '/tf_static':
+            tcp_server.loginfo("Setting durability to TRANSIENT_LOCAL for topic: " + topic)
+            qos_profile.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+
         # Start Subscriber listener function
         self.subscription = self.create_subscription(
             self.msg, self.topic, self.send, qos_profile  # queue_size

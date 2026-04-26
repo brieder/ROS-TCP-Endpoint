@@ -18,8 +18,11 @@ def launch_setup(
     context: LaunchContext, *args, **kwargs
 ) -> list[LaunchDescriptionEntity]:
 
+    enable_tcp = LaunchConfiguration("enable_tcp")
     enable_voxelpose = LaunchConfiguration("enable_voxelpose")
+
     use_infrared = LaunchConfiguration("rs_enable_infra1").perform(context) # string
+
     rs_infra_profile = LaunchConfiguration("rs_infra_profile").perform(context)
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile").perform(context)
 
@@ -52,6 +55,7 @@ def launch_setup(
 
     # Unity tcp endpoint
     tcp_node = Node(
+        condition=IfCondition(enable_tcp),
         package="ros_tcp_endpoint",
         executable="default_server_endpoint",
         name="unity_tcp_connector",
@@ -174,10 +178,16 @@ def generate_launch_description():
             default_value="./configs/voxelpose_params.yaml",
             description="Path to a file containing voxelpose node parameters.",
         ),
+
         DeclareLaunchArgument(
             "enable_voxelpose",
             default_value="True",
-            description="Run Voxelpose or not.",
+            description="Enable Voxelpose.",
+        ),
+        DeclareLaunchArgument(
+            "enable_tcp",
+            default_value="True",
+            description="Enable Unity ROS TCP Endpoint.",
         ),
 
         # Cameras Launch

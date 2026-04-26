@@ -89,7 +89,7 @@ RUN rosdep fix-permissions && \
 #
 
 WORKDIR $WORKROOT
-RUN git clone -b main-ros2 https://github.com/Unity-Technologies/ROS-TCP-Endpoint
+RUN git clone -b main-ros2 https://github.com/brieder/ROS-TCP-Endpoint
 WORKDIR $WORKROOT/ROS-TCP-Endpoint
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     sudo apt-get update && \

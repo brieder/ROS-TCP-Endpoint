@@ -18,6 +18,7 @@ def launch_setup(
     context: LaunchContext, *args, **kwargs
 ) -> list[LaunchDescriptionEntity]:
 
+    enable_extrinsics = LaunchConfiguration("enable_extrinsics")
     enable_tcp = LaunchConfiguration("enable_tcp")
     enable_voxelpose = LaunchConfiguration("enable_voxelpose")
 
@@ -37,10 +38,15 @@ def launch_setup(
             "cameras_file": LaunchConfiguration("cameras_file"),
             "rs_enable_color": LaunchConfiguration("rs_enable_color"),
             "rs_enable_infra1": LaunchConfiguration("rs_enable_infra1"),
+
+            "rs_infra_enable_ae": LaunchConfiguration("rs_infra_enable_ae"),
+            "rs_infra_exposure": LaunchConfiguration("rs_infra_exposure"),
             "rs_infra_profile": LaunchConfiguration("rs_infra_profile"),
+
             "rs_rgb_enable_ae": LaunchConfiguration("rs_rgb_enable_ae"),
             "rs_rgb_exposure": LaunchConfiguration("rs_rgb_exposure"),
             "rs_rgb_profile": LaunchConfiguration("rs_rgb_profile"),
+
             "rs_serials": LaunchConfiguration("rs_serials"),
             "usb_serials": LaunchConfiguration("usb_serials"),
         }.items(),
@@ -86,6 +92,7 @@ def launch_setup(
 
     # extrinsics calibrator
     extrinsics_node = Node(
+        condition=IfCondition(enable_extrinsics),
         package="extrinsic_calibrator_core",
         executable="extrinsic_calibrator_node.py",
         name="extrinsic_calibrator",
@@ -180,14 +187,19 @@ def generate_launch_description():
         ),
 
         DeclareLaunchArgument(
-            "enable_voxelpose",
+            "enable_extrinsics",
             default_value="True",
-            description="Enable Voxelpose.",
+            description="Enable Extrinsic Calibrator.",
         ),
         DeclareLaunchArgument(
             "enable_tcp",
             default_value="True",
             description="Enable Unity ROS TCP Endpoint.",
+        ),
+        DeclareLaunchArgument(
+            "enable_voxelpose",
+            default_value="False",
+            description="Enable Voxelpose.",
         ),
 
         # Cameras Launch
@@ -201,11 +213,23 @@ def generate_launch_description():
             default_value="False",
             description="Realsense Enable infra1 stream",
         ),
+
+        DeclareLaunchArgument(
+            "rs_infra_enable_ae",
+            default_value="False",
+            description="Realsense Enable RGB Auto Exposure",
+        ),
+        DeclareLaunchArgument(
+            "rs_infra_exposure",
+            default_value="17000",
+            description="Realsense Infrared Exposure",
+        ),
         DeclareLaunchArgument(
             "rs_infra_profile",
-            default_value="1280x800x30",
+            default_value="1280x800x15",
             description="Realsense RGB Color Profile.",
         ),
+
         DeclareLaunchArgument(
             "rs_rgb_enable_ae",
             default_value="True",
@@ -221,6 +245,7 @@ def generate_launch_description():
             default_value="960x540x60",
             description="Realsense RGB Color Profile.",
         ),
+
         DeclareLaunchArgument(
             "rs_serials",
             default_value="[]",

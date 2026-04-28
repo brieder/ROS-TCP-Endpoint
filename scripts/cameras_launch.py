@@ -18,6 +18,8 @@ def launch_setup(
     cameras_file = LaunchConfiguration("cameras_file")
     rs_enable_color = LaunchConfiguration("rs_enable_color")
     rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
+    rs_infra_enable_ae = LaunchConfiguration("rs_infra_enable_ae")
+    rs_infra_exposure = LaunchConfiguration("rs_infra_exposure")
     rs_infra_profile = LaunchConfiguration("rs_infra_profile")
     rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
     rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
@@ -44,20 +46,28 @@ def launch_setup(
                                 'serial_no': rs_serial,
                                 'camera_name': camera_name,
                                 #'tf_prefix': f'camera_{rs_serial}/', # doesn't work, ros1 only?
+
                                 'depth_module.infra_profile': rs_infra_profile,
+                                'depth_module.enable_auto_exposure': rs_infra_enable_ae,
+                                'depth_module.exposure': rs_infra_exposure,
+
                                 'rgb_camera.color_profile': rs_rgb_profile,
                                 'rgb_camera.auto_exposure_priority': False,
                                 'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
                                 'rgb_camera.exposure': rs_rgb_exposure,
+
                                 'enable_color': rs_enable_color,
                                 'enable_depth': False,
                                 'enable_infra1': rs_enable_infra1,
                                 'enable_infra2': False,
                                 'enable_gyro': False,
                                 'enable_accel': False,
+
                                 'publish_tf': False,
+
                                 'depth_module.emitter_enabled': 0,
                                 'depth_module.laser_power': 0.0,
+
                                 'color_info_qos': 'SENSOR_DATA',
                                 'color_qos': 'SENSOR_DATA',
                             }
@@ -119,6 +129,7 @@ def generate_launch_description():
             default_value="cameras.yaml",
             description="Yaml file full of cameras.",
         ),
+
         DeclareLaunchArgument(
             "rs_enable_color",
             default_value="True",
@@ -129,11 +140,23 @@ def generate_launch_description():
             default_value="False",
             description="Realsense Enable infra1 stream",
         ),
+
+        DeclareLaunchArgument(
+            "rs_infra_enable_ae",
+            default_value="False",
+            description="Realsense Enable RGB Auto Exposure",
+        ),
+        DeclareLaunchArgument(
+            "rs_infra_exposure",
+            default_value="156",
+            description="Realsense Infrared Exposure",
+        ),
         DeclareLaunchArgument(
             "rs_infra_profile",
             default_value="1280x800x30",
             description="Realsense RGB Color Profile.",
         ),
+
         DeclareLaunchArgument(
             "rs_rgb_enable_ae",
             default_value="True",
@@ -149,6 +172,7 @@ def generate_launch_description():
             default_value="960x540x60",
             description="Realsense RGB Color Profile.",
         ),
+
         DeclareLaunchArgument(
             "rs_serials",
             default_value="[]",

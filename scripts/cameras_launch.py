@@ -33,7 +33,7 @@ def launch_setup(
 
     # Realsense
     rs_nodes = []
-    for rs_serial in rs_serials:
+    for rs_serial in rs_serials.keys():
         #camera_name = f'camera_{rs_serial}'
         camera_name = f'C{rs_serial}'
         rs_nodes.append(
@@ -45,7 +45,6 @@ def launch_setup(
                 parameters=[{
                                 'serial_no': rs_serial,
                                 'camera_name': camera_name,
-                                #'tf_prefix': f'camera_{rs_serial}/', # doesn't work, ros1 only?
 
                                 'depth_module.infra_profile': rs_infra_profile,
                                 'depth_module.enable_auto_exposure': rs_infra_enable_ae,
@@ -148,7 +147,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "rs_infra_exposure",
-            default_value="156",
+            default_value="8500",
             description="Realsense Infrared Exposure",
         ),
         DeclareLaunchArgument(

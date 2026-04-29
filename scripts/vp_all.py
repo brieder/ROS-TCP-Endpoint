@@ -26,10 +26,6 @@ def launch_setup(
 
     rs_infra_profile = LaunchConfiguration("rs_infra_profile").perform(context)
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile").perform(context)
-
-    cameras_file = LaunchConfiguration("cameras_file")
-    with open(cameras_file.perform(context), 'r') as file:
-        serial_list = yaml.safe_load(file)    
     
     # RS and USB cameras launch
     cameras_launch = IncludeLaunchDescription(
@@ -68,6 +64,10 @@ def launch_setup(
         arguments=[ "ROS_IP", "0.0.0.0" ],
     )
 
+    cameras_file = LaunchConfiguration("cameras_file")
+    with open(cameras_file.perform(context), 'r') as file:
+        serial_list = yaml.safe_load(file)    
+
     # setup the extrinsics params file with the cameras
     extrinsics_params_path = LaunchConfiguration("extrinsics_params_path").perform(context)
     extrinsics_params_path_procd = extrinsics_params_path + "x"
@@ -75,7 +75,12 @@ def launch_setup(
         params_data = yaml.safe_load(file)    
 
         cameras = dict()
-        for serial in serial_list:
+        for serial, flags in serial_list.items():
+
+            # extrinsics flag defaults True, skip if it's set to False.
+            if flags and 'extrinsics' in flags and flags["extrinsics"] == False:
+                continue
+
             camera = dict()
             if use_infrared == "True":
                 camera['camera_info_topic'] = f"/C{serial}/infra1/camera_info"
@@ -100,6 +105,7 @@ def launch_setup(
     )
 
     # voxelpose params
+    ncameras = 0
     voxelpose_params_path = LaunchConfiguration("voxelpose_params_path").perform(context)
     voxelpose_params_path_procd = voxelpose_params_path + "x"
     with open(voxelpose_params_path, 'r') as file:
@@ -110,27 +116,29 @@ def launch_setup(
         voxelpose_config_path_procd = voxelpose_config_path + "x"
         params_data['/**']['ros__parameters']['voxelpose']['config_file'] = voxelpose_config_path_procd
 
-        # camera names
+        # camera names and list
         camera_names = []
-        for serial in serial_list:
+        cameras = dict()
+        leading = True
+        for serial, flags in serial_list.items():
+
+            # voxelpose flag defaults False
+            if not flags or not 'voxelpose' in flags or flags["voxelpose"] == False:
+                continue
+
             camera_names.append(f"C{serial}")
 
-        params_data['/**']['ros__parameters']['camera_names'] = camera_names
-
-        # cameras list
-        cameras = dict()
-        cameras['n_min_cameras'] = len(serial_list)
-
-        # each camera
-        leading = True
-        for serial in serial_list:
             camera = dict()
-            camera['leading'] = leading; leading = False
+            camera['leading'] = (ncameras == 0)
             if use_infrared == "True":
                 camera['infrared'] = True
 
             cameras[f"C{serial}"] = camera
+            ncameras += 1
 
+        cameras['n_min_cameras'] = ncameras
+
+        params_data['/**']['ros__parameters']['camera_names'] = camera_names
         params_data['/**']['ros__parameters']['cameras'] = cameras
 
         # save
@@ -142,7 +150,7 @@ def launch_setup(
         config_data = yaml.safe_load(file)    
         
         # num cameras
-        config_data['DATASET']['CAMERA_NUM'] = len(serial_list)
+        config_data['DATASET']['CAMERA_NUM'] = ncameras
 
         if use_infrared == "True":
             result = parse.parse('{width}x{height}x{fps}', rs_infra_profile)
@@ -188,7 +196,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "enable_extrinsics",
-            default_value="True",
+            default_value="False",
             description="Enable Extrinsic Calibrator.",
         ),
         DeclareLaunchArgument(

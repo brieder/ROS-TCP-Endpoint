@@ -27,8 +27,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list[LaunchDescript
         package="happypose_ros",
         executable="happypose_node",
         name="happypose_node",
-        #parameters=[ParameterFile(param_file=happypose_params_path, allow_substs=True)],
-        parameters=['./configs/happypose.params.yaml'],
+        parameters=[ParameterFile(param_file=happypose_params_path, allow_substs=True)],
     )
 
     # Start RViz2 ROS node
@@ -49,7 +48,7 @@ def launch_setup(context: LaunchContext, *args, **kwargs) -> list[LaunchDescript
         arguments=[
             "--roll", "-1.57",
             "--yaw", "-1.57",
-            "--frame-id", "world",
+            "--frame-id", "map",
             "--child-frame-id", "camera_1",
         ],
     )
@@ -61,9 +60,10 @@ def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument(
             "happypose_params_path",
-            default_value=PathJoinSubstitution([FindPackageShare("happypose_examples"), "config", "cosypose_params.yaml",]),
+            default_value="./configs/happypose_params.yamlx",
             description="Path to a file containing happypose_ros node parameters.",
         ),
+
         DeclareLaunchArgument(
             "dataset_name",
             default_value="ycbv",
@@ -89,6 +89,7 @@ def generate_launch_description():
             default_value="true",
             description="Publish static transforamtion for the camera.",
         ),
+
         DeclareLaunchArgument(
             "rviz_config_path",
             default_value=PathJoinSubstitution([FindPackageShare("happypose_examples"), "rviz", "happypose_example.rviz",]),
@@ -96,7 +97,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "use_rviz",
-            default_value="true",
+            default_value="false",
             description="Launch RViz with default view.",
         ),
     ]

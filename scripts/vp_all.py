@@ -104,6 +104,39 @@ def launch_setup(
         parameters=[extrinsics_params_path_procd],
     )
 
+    # happypose params
+    ncameras = 0
+    happypose_params_path = LaunchConfiguration("happypose_params_path").perform(context)
+    happypose_params_path_procd = happypose_params_path + "x"
+    with open(happypose_params_path, 'r') as file:
+        params_data = yaml.safe_load(file)    
+
+        # camera names and list
+        camera_names = []
+        cameras = dict()
+        leading = True
+        for serial, flags in serial_list.items():
+
+            # voxelpose flag defaults False
+            if not flags or not 'happypose' in flags or flags["happypose"] == False:
+                continue
+
+            camera_names.append(f"C{serial}")
+
+            camera = dict()
+            camera['leading'] = (ncameras == 0)
+
+            cameras[f"C{serial}"] = camera
+            ncameras += 1
+
+        cameras['n_min_cameras'] = ncameras
+
+        params_data['/**']['ros__parameters']['camera_names'] = camera_names
+        params_data['/**']['ros__parameters']['cameras'] = cameras
+
+        with open(happypose_params_path_procd, 'w') as file:
+            yaml.dump(params_data, file)
+
     # voxelpose params
     ncameras = 0
     voxelpose_params_path = LaunchConfiguration("voxelpose_params_path").perform(context)
@@ -189,6 +222,11 @@ def generate_launch_description():
             description="Path to a file containing extrinsics_calibrator node parameters.",
         ),
         DeclareLaunchArgument(
+            "happypose_params_path",
+            default_value="./configs/happypose_params.yaml",
+            description="Path to a file containing happypose_ros node parameters.",
+        ),
+        DeclareLaunchArgument(
             "voxelpose_params_path",
             default_value="./configs/voxelpose_params.yaml",
             description="Path to a file containing voxelpose node parameters.",
@@ -196,7 +234,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "enable_extrinsics",
-            default_value="False",
+            default_value="True",
             description="Enable Extrinsic Calibrator.",
         ),
         DeclareLaunchArgument(

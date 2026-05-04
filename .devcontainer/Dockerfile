@@ -24,7 +24,22 @@ RUN groupadd --gid $USER_GID $USERNAME \
 
 # Upgrade and get some misc stuff.
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y ca-certificates curl libboost-all-dev nano python3-pip python3-prettytable python3-venv tmux unzip vim wget
+RUN apt-get install -y \
+    ca-certificates \
+    curl \
+    libboost-all-dev \
+    nano \
+    nginx \
+    python3-pip \
+    python3-prettytable \
+    python3-venv \
+    tmux \
+    unzip \
+    vim \
+    wget
+
+# copy nginx default site config across to server up vdt data dir (foxglove meshes).
+COPY ../nginx.default /etc/nginx/sites-available/default
 
 ENV SHELL=/bin/bash
 

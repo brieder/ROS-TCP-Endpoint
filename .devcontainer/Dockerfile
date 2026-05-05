@@ -225,7 +225,7 @@ ENV HAPPYPOSE_DATA_DIR="$WORKROOT/data/happypose"
 # happypose_ros (no submodules)
 WORKDIR $WORKROOT
 #RUN git clone https://github.com/agimus-project/happypose_ros $WORKROOT/happypose_ros/
-RUN git clone https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
+RUN git clone --depth=1 https://voidvr@dev.azure.com/voidvr/TheVoid/_git/vdt_happypose_ros $WORKROOT/happypose_ros/
 
 WORKDIR $WORKROOT/happypose_ros
 
@@ -241,7 +241,7 @@ RUN . $WORKROOT/miniconda3/bin/activate && \
     conda activate happypose && \
 # RUN . $WORKROOT/happypose/.venv/bin/activate && \
     . /opt/ros/$ROS_DISTRO/setup.sh && \
-    colcon build --symlink-install
+    colcon build
 
 
 #

@@ -1,0 +1,26 @@
+image_width: 640
+image_height: 480
+camera_name: 2D18C067
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [505.41635,   0.     , 302.38568,
+           0.     , 502.99186, 241.38026,
+           0.     ,   0.     ,   1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.160274, -0.296146, -0.000218, -0.000133, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [513.05524,   0.     , 300.83943,   0.     ,
+           0.     , 512.78357, 240.80518,   0.     ,
+           0.     ,   0.     ,   1.     ,   0.     ]

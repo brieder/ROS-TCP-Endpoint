@@ -29,7 +29,7 @@ def launch_setup(
     
     # RS and USB cameras launch
     cameras_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource("scripts/cameras_launch.py"),
+        PythonLaunchDescriptionSource("scripts/launch_cameras.py"),
         launch_arguments={
             "cameras_file": LaunchConfiguration("cameras_file"),
             "rs_enable_color": LaunchConfiguration("rs_enable_color"),
@@ -42,9 +42,6 @@ def launch_setup(
             "rs_rgb_enable_ae": LaunchConfiguration("rs_rgb_enable_ae"),
             "rs_rgb_exposure": LaunchConfiguration("rs_rgb_exposure"),
             "rs_rgb_profile": LaunchConfiguration("rs_rgb_profile"),
-
-            "rs_serials": LaunchConfiguration("rs_serials"),
-            "usb_serials": LaunchConfiguration("usb_serials"),
         }.items(),
     )
 
@@ -117,7 +114,7 @@ def launch_setup(
         leading = True
         for serial, flags in serial_list.items():
 
-            # voxelpose flag defaults False
+            # happypose flag defaults False
             if not flags or not 'happypose' in flags or flags["happypose"] == False:
                 continue
 

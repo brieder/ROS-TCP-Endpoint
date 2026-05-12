@@ -9,8 +9,8 @@ conda activate happypose
 export HAPPYPOSE_DATA_DIR=/workspaces/vdt/data/happypose
 export LD_LIBRARY_PATH=/home/void/miniconda3/lib:$LD_LIBRARY_PATH
 
-#source /home/void/happypose_ros/install/setup.bash
-source /workspaces/vdt/happypose_ros/install/setup.bash
+source /home/void/happypose_ros/install/setup.bash
+#source /workspaces/vdt/happypose_ros/install/setup.bash
 
 export PYTHONPATH=/home/void/miniconda3/envs/happypose/lib/python3.10/site-packages:$PYTHONPATH
 

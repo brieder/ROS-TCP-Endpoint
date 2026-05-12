@@ -16,6 +16,7 @@ def launch_setup(
     context: LaunchContext, *args, **kwargs
 ) -> list[LaunchDescriptionEntity]:
     cameras_file = LaunchConfiguration("cameras_file")
+    
     rs_enable_color = LaunchConfiguration("rs_enable_color")
     rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
     rs_infra_enable_ae = LaunchConfiguration("rs_infra_enable_ae")
@@ -24,18 +25,19 @@ def launch_setup(
     rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
     rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
-    #rs_serials = eval(LaunchConfiguration("rs_serials").perform(context))
-    usb_serials = eval(LaunchConfiguration("usb_serials").perform(context))
 
     cameras_file = LaunchConfiguration("cameras_file")
     with open(cameras_file.perform(context), 'r') as file:
-        rs_serials = yaml.safe_load(file)    
+        cameras = yaml.safe_load(file)    
 
     # Realsense
     rs_nodes = []
-    for rs_serial in rs_serials.keys():
-        #camera_name = f'camera_{rs_serial}'
-        camera_name = f'C{rs_serial}'
+    for serial, options in cameras.items():
+        # realsense flag defaults False
+        if not options or not 'type' in options or options['type'] != 'realsense':
+            continue
+
+        camera_name = f'C{serial}'
         rs_nodes.append(
             Node(
                 package='realsense2_camera', 
@@ -43,7 +45,7 @@ def launch_setup(
                 name=camera_name,
                 namespace='/',
                 parameters=[{
-                                'serial_no': rs_serial,
+                                'serial_no': serial,
                                 'camera_name': camera_name,
 
                                 'depth_module.infra_profile': rs_infra_profile,
@@ -97,22 +99,31 @@ def launch_setup(
 
     # USB
     usb_nodes = []
-    for usb_serial in usb_serials:
+    for serial, options in cameras.items():
+        # usb flag defaults False
+        if not options or not 'type' in options or options['type'] != 'usb':
+            continue
+
         device_name = 'Serial Not Found' # will cause an error
-        for device in pyudev_context.list_devices(subsystem='video4linux', ID_SERIAL_SHORT=usb_serial):
+        for device in pyudev_context.list_devices(subsystem='video4linux', ID_SERIAL_SHORT=serial):
             # Example: Brio has 4 devices: rgb, meta, ir, meta. RS has inconsistent order.
             device_name = device.get('DEVNAME')
             break
 
+        camera_name = f'C{serial}'
         usb_nodes.append(
             Node(
                 package='usb_cam', 
                 executable='usb_cam_node_exe',
-                name=f'camera_{usb_serial}',
-                namespace=f'/camera_{usb_serial}/color',
-                parameters=['./params_usb_cam_1.yaml',
+                #name=camera_name,
+                namespace=f'/{camera_name}/color',
+                #arguments=['--ros-args', '--log-level', 'debug'],
+                #parameters=[f'./configs/camera_usb_yuyv.yaml',
+                parameters=[f'./configs/camera_usb_mjpeg.yaml',
                             {
-                                'frame_id': f'camera_{usb_serial}',
+                                'camera_info_url': f'file:///workspaces/vdt/cameras/{serial}.yaml',
+                                'camera_name': camera_name,
+                                'frame_id': camera_name,
                                 'video_device': device_name
                             }
                 ]
@@ -170,17 +181,6 @@ def generate_launch_description():
             "rs_rgb_profile",
             default_value="960x540x60",
             description="Realsense RGB Color Profile.",
-        ),
-
-        DeclareLaunchArgument(
-            "rs_serials",
-            default_value="[]",
-            description="List of Realsense serials.",
-        ),
-        DeclareLaunchArgument(
-            "usb_serials",
-            default_value="[]",
-            description="List of USB serials.",
         ),
     ]
 

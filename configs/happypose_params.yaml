@@ -60,6 +60,7 @@
           # Corresponds to iterative ICP, where the original point cloud is subsampled.
           # Note that if the output of CosyPose is considered good, ``num_levels`` does not have to be high
           num_levels: 4
+        labels_to_keep: [ "ycbv-obj_000002", "ycbv-obj_000004", "ycbv-obj_000005", "ycbv-obj_000006", "ycbv-obj_000009", "ycbv-obj_000015", "ycbv-obj_000018" ]
     # List of camera names to subscribe to. Those names are internal to happypose_ros node
     # and can be chosen arbitrarily as long as they are valid YAML keys to be used later
     camera_names: ["camera_841512071777"]

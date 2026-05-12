@@ -13,13 +13,17 @@ happypose_ros/
 ros2_ws/
 extrinsic_calibrator/
 Pangolin/
+ROS-TCP-Endpoint/
 vdt_Faster-VoxelPose/
 voxelpose_ros/
 
 __pycache__
 
 BUILDTOKEN
+cameras.yaml
 
-*.ts
+*.orig
 *.pid
 *.png
+*.ts
+*.yamlx

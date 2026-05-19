@@ -3,9 +3,10 @@
     aruco_dict: "DICT_APRILTAG_36h11"
     marker_length: 0.5
     reference_marker: 14
+    reference_marker_vertical: False
     frame_averaging: True
     frame_averaging_queue_size: 14
-    position_threshold: 0.02
+    position_threshold: 0.03
     rotation_threshold: 10.0
     cameras:
       C814412071982:

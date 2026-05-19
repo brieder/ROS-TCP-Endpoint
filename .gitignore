@@ -9,7 +9,9 @@ test/
 rosbag*/
 
 apriltag_ros/
+bop_toolkit/
 happypose_ros/
+rclpy_ws/
 ros2_ws/
 extrinsic_calibrator/
 Pangolin/

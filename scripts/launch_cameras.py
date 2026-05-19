@@ -9,6 +9,7 @@ from launch.launch_description_entity import LaunchDescriptionEntity
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
+import parse
 import pyudev # usb serials
 import yaml
 
@@ -25,6 +26,8 @@ def launch_setup(
     rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
     rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
+
+    usb_rgb_profile = LaunchConfiguration("usb_rgb_profile").perform(context)
 
     cameras_file = LaunchConfiguration("cameras_file")
     with open(cameras_file.perform(context), 'r') as file:
@@ -99,11 +102,32 @@ def launch_setup(
 
     # USB
     usb_nodes = []
+    usb_rgb_profile_parse = parse.parse('{width}x{height}x{fps}', usb_rgb_profile)
     for serial, options in cameras.items():
         # usb flag defaults False
         if not options or not 'type' in options or options['type'] != 'usb':
             continue
 
+        # check options for width, height, fps, format, options override profile
+        if 'width' in options: 
+            width = options['width']
+        else:
+            width = int(usb_rgb_profile_parse['width'])
+        if 'height' in options: 
+            height = options['height']
+        else:
+            height = int(usb_rgb_profile_parse['height'])
+        if 'fps' in options: 
+            fps = options['fps']
+        else:
+            fps = float(usb_rgb_profile_parse['fps'])
+        if 'format' in options: 
+            format = options['format']
+        else:
+            format = 'mjpeg2rgb' # or yuyv
+        # ae / af
+        # exposure
+        
         device_name = 'Serial Not Found' # will cause an error
         for device in pyudev_context.list_devices(subsystem='video4linux', ID_SERIAL_SHORT=serial):
             # Example: Brio has 4 devices: rgb, meta, ir, meta. RS has inconsistent order.
@@ -124,6 +148,10 @@ def launch_setup(
                                 'camera_info_url': f'file:///workspaces/vdt/cameras/{serial}.yaml',
                                 'camera_name': camera_name,
                                 'frame_id': camera_name,
+                                'image_width': width,
+                                'image_height': height,
+                                'fps': fps,
+                                'pixel_format': format,
                                 'video_device': device_name
                             }
                 ]
@@ -169,7 +197,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "rs_rgb_enable_ae",
-            default_value="True",
+            default_value="False",
             description="Realsense Enable RGB Auto Exposure",
         ),
         DeclareLaunchArgument(
@@ -181,6 +209,12 @@ def generate_launch_description():
             "rs_rgb_profile",
             default_value="960x540x60",
             description="Realsense RGB Color Profile.",
+        ),
+
+        DeclareLaunchArgument(
+            "usb_rgb_profile",
+            default_value="960x540x60",
+            description="USB RGB Color Profile.",
         ),
     ]
 

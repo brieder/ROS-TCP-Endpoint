@@ -1,2 +1,2 @@
 #!/bin/bash
-ros2 launch ./scripts/apriltags_launch.py camera_serials:="['814412071982', '829212072304', '829212072337', '843112071706']"
+ros2 launch ./scripts/launch_apriltags.py camera_serials:="['829212072304', '843112071706']"

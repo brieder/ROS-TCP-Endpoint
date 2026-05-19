@@ -5,6 +5,7 @@
 # $3 - chessboard square size in meters
 
 source /opt/ros/humble/setup.bash
+
 echo $$ > /workspaces/vdt/scripts/calibration.pid
 
 echo "Press Q in calibrator to exit cleanly."

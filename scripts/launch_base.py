@@ -275,12 +275,12 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "rs_rgb_enable_ae",
-            default_value="True",
+            default_value="False",
             description="Realsense Enable RGB Auto Exposure",
         ),
         DeclareLaunchArgument(
             "rs_rgb_exposure",
-            default_value="156",
+            default_value="312",
             description="Realsense RGB Exposure",
         ),
         DeclareLaunchArgument(

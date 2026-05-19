@@ -1,0 +1,46 @@
+FROM ros:humble-perception 
+
+ARG WORKROOT=/root
+
+ENV SHELL=/bin/bash
+
+# Azure PAT workaround because git lfs over ssh is broken on Azure.
+RUN --mount=type=secret,id=PAT \
+    TOKEN=$(sudo cat /run/secrets/PAT) && \
+    B64_TOKEN=$(printf "%s"":$TOKEN" | base64) && \
+    git config --global --add http.extraHeader "Authorization: Basic ${B64_TOKEN}"
+
+# ros packages
+RUN apt-get update && apt-get install -y \
+    #ros-$ROS_DISTRO-ament-cmake \
+    ros-$ROS_DISTRO-foxglove-bridge \
+    && rm -rf /var/lib/apt/lists/*
+
+# Unity TCP Connector
+WORKDIR $WORKROOT
+RUN git clone -b main-ros2 https://github.com/brieder/ROS-TCP-Endpoint
+WORKDIR $WORKROOT/ROS-TCP-Endpoint
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    sudo apt-get update && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    colcon build --symlink-install && \
+    sudo rm -rf /var/lib/apt/lists/*
+
+# voxelpose wrapper for msgs
+WORKDIR $WORKROOT
+RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_voxelpose_ros voxelpose_ros
+WORKDIR $WORKROOT/voxelpose_ros
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    colcon build --packages-select voxelpose_msgs
+# RUN sudo apt-get update && \
+#     # rosdep
+#     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+#     sudo rm -rf /var/lib/apt/lists/* && \
+#     # build
+#     colcon build --packages-select voxelpose_msgs
+
+RUN echo "source /root/ROS-TCP-Endpoint/install/setup.bash" >> /root/.bashrc && \
+    echo "source /root/voxelpose_ros/install/setup.bash" >> /root/.bashrc
+
+WORKDIR /workspaces/vdt
+CMD ["/bin/bash"]

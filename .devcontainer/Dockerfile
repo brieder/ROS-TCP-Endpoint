@@ -297,11 +297,12 @@ RUN . $WORKROOT/fastervoxelpose/venv/bin/activate && \
 # .bashrc
 # 
 
-RUN echo "source /opt/ros/humble/setup.bash" >> /home/$USERNAME/.bashrc && \
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> /home/$USERNAME/.bashrc && \
     echo "export SPINNAKER_GENTL64_CTI=/opt/ros/${ROS_DISTRO}/lib/spinnaker-gentl/Spinnaker_GenTL.cti" >> /home/$USERNAME/.bashrc
 
 # GO
 
 WORKDIR /workspaces/vdt
-CMD [ "sleep", "infinity" ]
 #CMD ["/bin/bash"]
+CMD ["sudo", "nginx", "-g", "daemon off;"]
+#CMD [ "sleep", "infinity" ]

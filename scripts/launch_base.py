@@ -41,6 +41,7 @@ def launch_setup(
 
             "rs_rgb_enable_ae": LaunchConfiguration("rs_rgb_enable_ae"),
             "rs_rgb_exposure": LaunchConfiguration("rs_rgb_exposure"),
+            "rs_rgb_gain": LaunchConfiguration("rs_rgb_gain"),
             "rs_rgb_profile": LaunchConfiguration("rs_rgb_profile"),
         }.items(),
     )
@@ -282,6 +283,11 @@ def generate_launch_description():
             "rs_rgb_exposure",
             default_value="312",
             description="Realsense RGB Exposure",
+        ),
+        DeclareLaunchArgument(
+            "rs_rgb_gain",
+            default_value="64",
+            description="Realsense RGB Gain",
         ),
         DeclareLaunchArgument(
             "rs_rgb_profile",

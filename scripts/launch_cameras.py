@@ -25,6 +25,7 @@ def launch_setup(
     rs_infra_profile = LaunchConfiguration("rs_infra_profile")
     rs_rgb_enable_ae = LaunchConfiguration("rs_rgb_enable_ae")
     rs_rgb_exposure = LaunchConfiguration("rs_rgb_exposure")
+    rs_rgb_gain = LaunchConfiguration("rs_rgb_gain")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
 
     usb_rgb_profile = LaunchConfiguration("usb_rgb_profile").perform(context)
@@ -59,6 +60,7 @@ def launch_setup(
                                 'rgb_camera.auto_exposure_priority': False,
                                 'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
                                 'rgb_camera.exposure': rs_rgb_exposure,
+                                'rgb_camera.gain': rs_rgb_gain,
 
                                 'enable_color': rs_enable_color,
                                 'enable_depth': False,
@@ -204,6 +206,11 @@ def generate_launch_description():
             "rs_rgb_exposure",
             default_value="156",
             description="Realsense RGB Exposure",
+        ),
+        DeclareLaunchArgument(
+            "rs_rgb_gain",
+            default_value="64",
+            description="Realsense RGB Gain",
         ),
         DeclareLaunchArgument(
             "rs_rgb_profile",

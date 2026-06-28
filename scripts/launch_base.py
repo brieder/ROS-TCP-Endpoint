@@ -3,6 +3,7 @@ from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
     OpaqueFunction,
+    TimerAction
 )
 from launch.conditions import IfCondition
 from launch.launch_context import LaunchContext
@@ -94,12 +95,17 @@ def launch_setup(
             yaml.dump(params_data, file)
 
     # extrinsics calibrator
-    extrinsics_node = Node(
-        condition=IfCondition(enable_extrinsics),
-        package="extrinsic_calibrator_core",
-        executable="extrinsic_calibrator_node.py",
-        name="extrinsic_calibrator",
-        parameters=[extrinsics_params_path_procd],
+    extrinsics_node = TimerAction(
+        period=10.0, # delay in secs
+        actions=[
+            Node(
+                condition=IfCondition(enable_extrinsics),
+                package="extrinsic_calibrator_core",
+                executable="extrinsic_calibrator_node.py",
+                name="extrinsic_calibrator",
+                parameters=[extrinsics_params_path_procd],
+            )
+        ]
     )
 
     # happypose params
@@ -281,7 +287,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "rs_rgb_exposure",
-            default_value="312",
+            default_value="156",
             description="Realsense RGB Exposure",
         ),
         DeclareLaunchArgument(

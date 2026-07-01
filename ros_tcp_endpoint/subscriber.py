@@ -50,6 +50,10 @@ class RosSubscriber(RosReceiver):
             tcp_server.loginfo("Setting durability to TRANSIENT_LOCAL for topic: " + topic)
             qos_profile.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
 
+        if message_class.__name__ == "Image":
+            tcp_server.loginfo("Setting reliability to BEST_EFFORT for topic: " + topic)
+            qos_profile.reliability = QoSReliabilityPolicy.BEST_EFFORT
+
         # Start Subscriber listener function
         self.subscription = self.create_subscription(
             self.msg, self.topic, self.send, qos_profile  # queue_size

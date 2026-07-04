@@ -1,5 +1,26 @@
 #!/bin/bash
 
+# See if disable-usbfs-check is set.
+while [[ $# -gt 0 ]]; do
+case "$1" in
+--disable-usbfs-check)
+echo "Disabling usbfs memory check."
+DISABLE_USBFS_CHECK=1
+;;
+esac
+shift 1  # Move to the next argument
+done
+
+# usfs memory check
+USBFS_MEMORY_LIMIT=1024
+USBFS_MEMORY=$(cat /sys/module/usbcore/parameters/usbfs_memory_mb)
+if [ "$USBFS_MEMORY" -lt "$USBFS_MEMORY_LIMIT" ] && [ -z $DISABLE_USBFS_CHECK ]; then
+    echo "ERROR: /sys/module/usbcore/parameters/usbfs_memory_mb ($USBFS_MEMORY) is less than $USBFS_MEMORY_LIMIT."
+    echo "Use --disable-usbfs-check to ignore this check."
+    # echo "1024" | sudo tee /sys/module/usbcore/parameters/usbfs_memory_mb
+    exit
+fi
+
 # fox and tcp: voxelpose msgs
 #source /home/void/voxelpose_ros/install/setup.bash
 source /workspaces/vdt/voxelpose_ros/install/setup.bash

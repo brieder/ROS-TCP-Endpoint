@@ -19,6 +19,7 @@ def launch_setup(
     cameras_file = LaunchConfiguration("cameras_file")
     
     rs_enable_color = LaunchConfiguration("rs_enable_color")
+    rs_enable_depth = LaunchConfiguration("rs_enable_depth")
     rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
     rs_infra_enable_ae = LaunchConfiguration("rs_infra_enable_ae")
     rs_infra_exposure = LaunchConfiguration("rs_infra_exposure")
@@ -63,7 +64,7 @@ def launch_setup(
                                 'rgb_camera.gain': rs_rgb_gain,
 
                                 'enable_color': rs_enable_color,
-                                'enable_depth': False,
+                                'enable_depth': rs_enable_depth,
                                 'enable_infra1': rs_enable_infra1,
                                 'enable_infra2': False,
                                 'enable_gyro': False,
@@ -81,24 +82,40 @@ def launch_setup(
             ) # Node
         ) # append
 
+        # static transform linking camera link to external camera positoin.
         if rs_enable_infra1.perform(context) == "True":
-            child_frame = f'{camera_name}_infra1_optical_frame'
+            color_child_frame = f'{camera_name}_infra1_optical_frame'
         else:
-            child_frame = f'{camera_name}_color_optical_frame'
-
+            color_child_frame = f'{camera_name}_color_optical_frame'
         rs_nodes.append(
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
-                name=f"static_transform_publisher_{camera_name}",
+                name=f"static_transform_publisher_color_{camera_name}",
                 arguments=[
                     # "--roll", "-1.57",
                     # "--yaw", "-1.57",
                     "--frame-id", camera_name,
-                    "--child-frame-id", child_frame,
+                    "--child-frame-id", color_child_frame,
                 ],
             ) # Node
         ) # append
+
+        if rs_enable_depth.perform(context) == "True":
+            depth_child_frame = f'{camera_name}_depth_optical_frame'
+            rs_nodes.append(
+                Node(
+                    package="tf2_ros",
+                    executable="static_transform_publisher",
+                    name=f"static_transform_publisher_depth_{camera_name}",
+                    arguments=[
+                        # "--roll", "-1.57",
+                        # "--yaw", "-1.57",
+                        "--frame-id", camera_name,
+                        "--child-frame-id", depth_child_frame,
+                    ],
+                ) # Node
+            ) # append
 
     pyudev_context = pyudev.Context()
 
@@ -174,6 +191,11 @@ def generate_launch_description():
             "rs_enable_color",
             default_value="True",
             description="Realsense Enable color stream",
+        ),
+        DeclareLaunchArgument(
+            "rs_enable_depth",
+            default_value="False",
+            description="Realsense Enable depth stream",
         ),
         DeclareLaunchArgument(
             "rs_enable_infra1",

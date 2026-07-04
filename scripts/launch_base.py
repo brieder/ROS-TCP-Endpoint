@@ -34,13 +34,15 @@ def launch_setup(
         PythonLaunchDescriptionSource("scripts/launch_cameras.py"),
         launch_arguments={
             "cameras_file": LaunchConfiguration("cameras_file"),
+            "rs_qos_sensor_data": LaunchConfiguration("rs_qos_sensor_data"),
+
             "rs_enable_color": LaunchConfiguration("rs_enable_color"),
+            "rs_enable_depth": LaunchConfiguration("rs_enable_depth"),
             "rs_enable_infra1": LaunchConfiguration("rs_enable_infra1"),
 
             "rs_infra_enable_ae": LaunchConfiguration("rs_infra_enable_ae"),
             "rs_infra_exposure": LaunchConfiguration("rs_infra_exposure"),
             "rs_infra_profile": LaunchConfiguration("rs_infra_profile"),
-
             "rs_rgb_enable_ae": LaunchConfiguration("rs_rgb_enable_ae"),
             "rs_rgb_exposure": LaunchConfiguration("rs_rgb_exposure"),
             "rs_rgb_gain": LaunchConfiguration("rs_rgb_gain"),
@@ -267,11 +269,22 @@ def generate_launch_description():
             description="Enable Web Video Server.",
         ),
 
+        DeclareLaunchArgument(
+            "rs_qos_sensor_data",
+            default_value="True",
+            description="Use SENSOR_DATA for Realsense QOS.",
+        ),
+
         # Cameras Launch
         DeclareLaunchArgument(
             "rs_enable_color",
             default_value="True",
             description="Realsense Enable color stream",
+        ),
+        DeclareLaunchArgument(
+            "rs_enable_depth",
+            default_value="True",
+            description="Realsense Enable depth stream",
         ),
         DeclareLaunchArgument(
             "rs_enable_infra1",

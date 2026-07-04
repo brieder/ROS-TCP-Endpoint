@@ -18,6 +18,8 @@ def launch_setup(
 ) -> list[LaunchDescriptionEntity]:
     cameras_file = LaunchConfiguration("cameras_file")
     
+    rs_qos_sensor_data = LaunchConfiguration("rs_qos_sensor_data")
+
     rs_enable_color = LaunchConfiguration("rs_enable_color")
     rs_enable_depth = LaunchConfiguration("rs_enable_depth")
     rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
@@ -43,42 +45,44 @@ def launch_setup(
             continue
 
         camera_name = f'C{serial}'
+        params_dict = {
+            'serial_no': serial,
+            'camera_name': camera_name,
+
+            'depth_module.infra_profile': rs_infra_profile,
+            'depth_module.enable_auto_exposure': rs_infra_enable_ae,
+            'depth_module.exposure': rs_infra_exposure,
+
+            'rgb_camera.color_profile': rs_rgb_profile,
+            'rgb_camera.auto_exposure_priority': False,
+            'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
+            'rgb_camera.exposure': rs_rgb_exposure,
+            'rgb_camera.gain': rs_rgb_gain,
+
+            'enable_color': rs_enable_color,
+            'enable_depth': rs_enable_depth,
+            'enable_infra1': rs_enable_infra1,
+            'enable_infra2': False,
+            'enable_gyro': False,
+            'enable_accel': False,
+
+            'publish_tf': False,
+
+            'depth_module.emitter_enabled': 0,
+            'depth_module.laser_power': 0.0,
+        }
+        
+        if rs_qos_sensor_data.perform(context) == "True":
+            qos_sensors_dict = { 'color_info_qos': 'SENSOR_DATA', 'color_qos': 'SENSOR_DATA'}
+            params_dict.update(qos_sensors_dict)
+
         rs_nodes.append(
             Node(
                 package='realsense2_camera', 
                 executable='realsense2_camera_node',
                 name=camera_name,
                 namespace='/',
-                parameters=[{
-                                'serial_no': serial,
-                                'camera_name': camera_name,
-
-                                'depth_module.infra_profile': rs_infra_profile,
-                                'depth_module.enable_auto_exposure': rs_infra_enable_ae,
-                                'depth_module.exposure': rs_infra_exposure,
-
-                                'rgb_camera.color_profile': rs_rgb_profile,
-                                'rgb_camera.auto_exposure_priority': False,
-                                'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
-                                'rgb_camera.exposure': rs_rgb_exposure,
-                                'rgb_camera.gain': rs_rgb_gain,
-
-                                'enable_color': rs_enable_color,
-                                'enable_depth': rs_enable_depth,
-                                'enable_infra1': rs_enable_infra1,
-                                'enable_infra2': False,
-                                'enable_gyro': False,
-                                'enable_accel': False,
-
-                                'publish_tf': False,
-
-                                'depth_module.emitter_enabled': 0,
-                                'depth_module.laser_power': 0.0,
-
-                                'color_info_qos': 'SENSOR_DATA',
-                                'color_qos': 'SENSOR_DATA',
-                            }
-                ] # parameters
+                parameters=[params_dict]
             ) # Node
         ) # append
 
@@ -185,6 +189,12 @@ def generate_launch_description():
             "cameras_file",
             default_value="cameras.yaml",
             description="Yaml file full of cameras.",
+        ),
+
+        DeclareLaunchArgument(
+            "rs_qos_sensor_data",
+            default_value="True",
+            description="Use SENSOR_DATA for Realsense QOS.",
         ),
 
         DeclareLaunchArgument(

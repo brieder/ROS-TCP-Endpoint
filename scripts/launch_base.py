@@ -22,6 +22,7 @@ def launch_setup(
     enable_extrinsics = LaunchConfiguration("enable_extrinsics")
     enable_tcp = LaunchConfiguration("enable_tcp")
     enable_voxelpose = LaunchConfiguration("enable_voxelpose")
+    enable_wvs = LaunchConfiguration("enable_wvs")
 
     use_infrared = LaunchConfiguration("rs_enable_infra1").perform(context) # string
 
@@ -63,6 +64,15 @@ def launch_setup(
         arguments=[ "ROS_IP", "0.0.0.0" ],
     )
 
+    # web video server
+    wvs_node = Node(
+        condition=IfCondition(enable_wvs),
+        package="web_video_server",
+        executable="web_video_server",
+        name="web_video_server",
+        arguments=[],
+    )
+
     cameras_file = LaunchConfiguration("cameras_file")
     with open(cameras_file.perform(context), 'r') as file:
         serial_list = yaml.safe_load(file)    
@@ -96,7 +106,7 @@ def launch_setup(
 
     # extrinsics calibrator
     extrinsics_node = TimerAction(
-        period=10.0, # delay in secs
+        period=5.0, # delay in secs
         actions=[
             Node(
                 condition=IfCondition(enable_extrinsics),
@@ -210,7 +220,7 @@ def launch_setup(
         parameters=[voxelpose_params_path_procd],
     )
 
-    return [cameras_launch, foxbridge_node, tcp_node, extrinsics_node, voxelpose_node]
+    return [cameras_launch, foxbridge_node, tcp_node, wvs_node, extrinsics_node, voxelpose_node]
 
 def generate_launch_description():
     declared_arguments = [
@@ -251,6 +261,11 @@ def generate_launch_description():
             default_value="False",
             description="Enable Voxelpose.",
         ),
+        DeclareLaunchArgument(
+            "enable_wvs",
+            default_value="True",
+            description="Enable Web Video Server.",
+        ),
 
         # Cameras Launch
         DeclareLaunchArgument(
@@ -287,7 +302,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "rs_rgb_exposure",
-            default_value="156",
+            default_value="312",
             description="Realsense RGB Exposure",
         ),
         DeclareLaunchArgument(

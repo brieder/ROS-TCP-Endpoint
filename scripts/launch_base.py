@@ -283,7 +283,7 @@ def generate_launch_description():
         ),
         DeclareLaunchArgument(
             "rs_enable_depth",
-            default_value="True",
+            default_value="False",
             description="Realsense Enable depth stream",
         ),
         DeclareLaunchArgument(

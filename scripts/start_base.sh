@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # See if disable-usbfs-check is set.
-while [[ $# -gt 0 ]]; do
-case "$1" in
---disable-usbfs-check)
-echo "Disabling usbfs memory check."
-DISABLE_USBFS_CHECK=1
-;;
-esac
-shift 1  # Move to the next argument
-done
+# while [[ $# -gt 0 ]]; do
+# case "$1" in
+# --disable-usbfs-check)
+# echo "Disabling usbfs memory check."
+# DISABLE_USBFS_CHECK=1
+# ;;
+# esac
+# shift 1  # Move to the next argument
+# done
 
 # usfs memory check
 USBFS_MEMORY_LIMIT=1024
@@ -22,16 +22,23 @@ if [ "$USBFS_MEMORY" -lt "$USBFS_MEMORY_LIMIT" ] && [ -z $DISABLE_USBFS_CHECK ];
 fi
 
 # fox and tcp: voxelpose msgs
-#source /home/void/voxelpose_ros/install/setup.bash
-source /workspaces/vdt/voxelpose_ros/install/setup.bash
+if [[ -n "${VDTDEV}" || -n "${VDTDEV_VPR}" ]]; then
+    source /workspaces/vdt/voxelpose_ros/install/setup.bash
+else
+    source /home/void/voxelpose_ros/install/setup.bash
+fi
 
 source /home/void/happypose_ros/install/setup.bash
+
 # tcp
 source /home/void/ROS-TCP-Endpoint/install/setup.bash
 
 # ext
-source /home/void/extrinsic_calibrator/install/setup.bash
-#source /workspaces/vdt/extrinsic_calibrator/install/setup.bash
+if [[ -n "${VDTDEV}" || -n "${VDTDEV_EXT}" ]]; then
+    source /workspaces/vdt/extrinsic_calibrator/install/setup.bash
+else
+    source /home/void/extrinsic_calibrator/install/setup.bash
+fi
 
 # VP python venv (won't work for happy)
 source /home/void/fastervoxelpose/venv/bin/activate

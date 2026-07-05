@@ -68,12 +68,16 @@ def launch_setup(
 
             'publish_tf': False,
 
+            # turn off emitter
             'depth_module.emitter_enabled': 0,
             'depth_module.laser_power': 0.0,
         }
         
         if rs_qos_sensor_data.perform(context) == "True":
-            qos_sensors_dict = { 'color_info_qos': 'SENSOR_DATA', 'color_qos': 'SENSOR_DATA'}
+            qos_sensors_dict = { 
+                'color_info_qos': 'SENSOR_DATA', 
+                'color_qos': 'SENSOR_DATA'
+            }
             params_dict.update(qos_sensors_dict)
 
         rs_nodes.append(
@@ -91,14 +95,15 @@ def launch_setup(
             color_child_frame = f'{camera_name}_infra1_optical_frame'
         else:
             color_child_frame = f'{camera_name}_color_optical_frame'
+            #color_child_frame = f'{camera_name}_link'
         rs_nodes.append(
             Node(
                 package="tf2_ros",
                 executable="static_transform_publisher",
                 name=f"static_transform_publisher_color_{camera_name}",
                 arguments=[
-                    # "--roll", "-1.57",
-                    # "--yaw", "-1.57",
+                    "--roll", "-1.57",
+                    "--yaw", "-1.57",
                     "--frame-id", camera_name,
                     "--child-frame-id", color_child_frame,
                 ],
@@ -113,8 +118,8 @@ def launch_setup(
                     executable="static_transform_publisher",
                     name=f"static_transform_publisher_depth_{camera_name}",
                     arguments=[
-                        # "--roll", "-1.57",
-                        # "--yaw", "-1.57",
+                        "--roll", "-1.57",
+                        "--yaw", "-1.57",
                         "--frame-id", camera_name,
                         "--child-frame-id", depth_child_frame,
                     ],
@@ -162,7 +167,7 @@ def launch_setup(
             Node(
                 package='usb_cam', 
                 executable='usb_cam_node_exe',
-                #name=camera_name,
+                name=camera_name, # Not right but not used really.
                 namespace=f'/{camera_name}/color',
                 #arguments=['--ros-args', '--log-level', 'debug'],
                 #parameters=[f'./configs/camera_usb_yuyv.yaml',
@@ -170,16 +175,33 @@ def launch_setup(
                             {
                                 'camera_info_url': f'file:///workspaces/vdt/cameras/{serial}.yaml',
                                 'camera_name': camera_name,
-                                'frame_id': camera_name,
+                                'frame_id': f'{camera_name}_color_optical_frame',
+                                'fps': fps,
                                 'image_width': width,
                                 'image_height': height,
-                                'fps': fps,
                                 'pixel_format': format,
                                 'video_device': device_name
                             }
                 ]
             )
         )
+
+        # add optical_frame for usb cameras
+        color_child_frame = f'{camera_name}_color_optical_frame'
+        usb_nodes.append(
+            Node(
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name=f"static_transform_publisher_color_{camera_name}",
+                arguments=[
+                    "--roll", "-1.57",
+                    "--yaw", "-1.57",
+                    "--frame-id", camera_name,
+                    "--child-frame-id", color_child_frame,
+                ],
+            ) # Node
+        ) # append
+
 
     return [*rs_nodes, *usb_nodes]
 

@@ -4,6 +4,7 @@ data/
 happypose_data/
 install/
 log/
+logs/
 test/
 
 rosbag*/
@@ -11,6 +12,7 @@ rosbag*/
 apriltag_ros/
 bop_toolkit/
 happypose_ros/
+image_pipeline/
 rclpy_ws/
 ros2_ws/
 extrinsic_calibrator/
@@ -24,6 +26,7 @@ __pycache__
 BUILDTOKEN
 cameras.yaml
 
+*.log
 *.orig
 *.pid
 *.png

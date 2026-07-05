@@ -33,6 +33,13 @@ source /home/void/happypose_ros/install/setup.bash
 # tcp
 source /home/void/ROS-TCP-Endpoint/install/setup.bash
 
+# usb_cam
+if [[ -n "${VDTDEV}" || -n "${VDTDEV_USB}" ]]; then
+    source /workspaces/vdt/usb_cam/install/setup.bash
+else
+    source /home/void/usb_cam/install/setup.bash
+fi
+
 # ext
 if [[ -n "${VDTDEV}" || -n "${VDTDEV_EXT}" ]]; then
     source /workspaces/vdt/extrinsic_calibrator/install/setup.bash

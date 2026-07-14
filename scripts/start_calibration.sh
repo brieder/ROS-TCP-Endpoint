@@ -19,6 +19,7 @@ if [ -e /tmp/calibrationdata.tar.gz ]; then
     rm /tmp/calibrationdata.tar.gz
 
     FileDate=$(date "+%Y%m%d_%H%M%S")
+    cp /tmp/ost.yaml /workspaces/vdt/cameras/$1.yaml
     cp /tmp/ost.yaml /workspaces/vdt/cameras/$1.${FileDate}.yaml
 else
     echo "No calibration data found."

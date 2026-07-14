@@ -176,7 +176,7 @@ def launch_setup(
                                 'camera_info_url': f'file:///workspaces/vdt/cameras/{serial}.yaml',
                                 'camera_name': camera_name,
                                 'frame_id': f'{camera_name}_color_optical_frame',
-                                'fps': fps,
+                                'framerate': fps,
                                 'image_width': width,
                                 'image_height': height,
                                 'pixel_format': format,
@@ -274,7 +274,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "usb_rgb_profile",
-            default_value="960x540x60",
+            default_value="640x480x60",
             description="USB RGB Color Profile.",
         ),
     ]

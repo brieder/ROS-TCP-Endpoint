@@ -53,4 +53,7 @@ source /home/void/fastervoxelpose/venv/bin/activate
 # libcudart.so.13 ldpath hack, the order is wrong somewhere.
 export LD_LIBRARY_PATH=/home/void/fastervoxelpose/venv/lib/python3.10/site-packages/nvidia/cu13/lib:$LD_LIBRARY_PATH
 
+# base masquerades as foxglove_bridge because base doesn't have it own node to track status on.
+echo $$ > /workspaces/vdt/scripts/foxglove_bridge.pid
+
 ros2 launch /workspaces/vdt/scripts/launch_base.py $*

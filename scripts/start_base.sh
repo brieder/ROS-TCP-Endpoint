@@ -36,7 +36,7 @@ source /home/void/ROS-TCP-Endpoint/install/setup.bash
 # usb_cam
 if [[ -n "${VDTDEV}" || -n "${VDTDEV_USB}" ]]; then
     source /workspaces/vdt/usb_cam/install/setup.bash
-else
+elif [ -e /home/void/usb_cam/install/setup.bash ]; then
     source /home/void/usb_cam/install/setup.bash
 fi
 

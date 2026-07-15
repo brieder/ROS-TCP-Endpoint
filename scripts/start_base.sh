@@ -33,6 +33,13 @@ source /home/void/happypose_ros/install/setup.bash
 # tcp
 source /home/void/ROS-TCP-Endpoint/install/setup.bash
 
+# usb_cam
+if [[ -n "${VDTDEV}" || -n "${VDTDEV_USB}" ]]; then
+    source /workspaces/vdt/usb_cam/install/setup.bash
+elif [ -e /home/void/usb_cam/install/setup.bash ]; then
+    source /home/void/usb_cam/install/setup.bash
+fi
+
 # ext
 if [[ -n "${VDTDEV}" || -n "${VDTDEV_EXT}" ]]; then
     source /workspaces/vdt/extrinsic_calibrator/install/setup.bash
@@ -48,5 +55,8 @@ source /home/void/fastervoxelpose/venv/bin/activate
 
 # libcudart.so.13 ldpath hack, the order is wrong somewhere.
 export LD_LIBRARY_PATH=/home/void/fastervoxelpose/venv/lib/python3.10/site-packages/nvidia/cu13/lib:$LD_LIBRARY_PATH
+
+# base masquerades as foxglove_bridge because base doesn't have it own node to track status on.
+echo $$ > /workspaces/vdt/scripts/foxglove_bridge.pid
 
 ros2 launch /workspaces/vdt/scripts/launch_base.py $*

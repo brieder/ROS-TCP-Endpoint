@@ -18,8 +18,8 @@ def launch_setup(
 ) -> list[LaunchDescriptionEntity]:
     cameras_file = LaunchConfiguration("cameras_file")
     
+    # realsense
     rs_qos_sensor_data = LaunchConfiguration("rs_qos_sensor_data")
-
     rs_enable_color = LaunchConfiguration("rs_enable_color")
     rs_enable_depth = LaunchConfiguration("rs_enable_depth")
     rs_enable_infra1 = LaunchConfiguration("rs_enable_infra1")
@@ -31,6 +31,10 @@ def launch_setup(
     rs_rgb_gain = LaunchConfiguration("rs_rgb_gain")
     rs_rgb_profile = LaunchConfiguration("rs_rgb_profile")
 
+    # basler pylon
+    pylon_rgb_profile = LaunchConfiguration("pylon_rgb_profile").perform(context)
+
+    # uvc
     usb_rgb_profile = LaunchConfiguration("usb_rgb_profile").perform(context)
 
     cameras_file = LaunchConfiguration("cameras_file")
@@ -126,9 +130,61 @@ def launch_setup(
                 ) # Node
             ) # append
 
-    pyudev_context = pyudev.Context()
+    # Pylon
+    pylon_nodes = []
+    for serial, options in cameras.items():
+        if not options or not 'type' in options or options['type'] != 'pylon':
+            continue
+
+        camera_name = f'C{serial}'
+        pylon_nodes.append(
+            Node(
+                package='pylon_ros2_camera_wrapper', 
+                executable='pylon_ros2_camera_wrapper',
+                namespace=camera_name,
+                name='color',
+                parameters=['./configs/camera_pylon.yaml',
+                            {
+                                'camera_frame': f'{camera_name}_color_optical_frame',
+                                'camera_info_url': f'file:///workspaces/vdt/cameras/{serial}.yaml',
+                                'device_user_id': serial,
+                            }
+                ] # parameters
+            ) # Node
+        ) # append
+
+        enable_debayer = True
+        if enable_debayer:
+            pylon_nodes.append(
+                Node(
+                    package="image_proc",
+                    executable="debayer_node",
+                    name=f"debayer_node_{camera_name}",
+                    remappings=[
+                                ('image_raw', f'/{camera_name}/color/image_raw'),
+                                ('image_color', f'/{camera_name}/color/image_color'),
+                    ]
+                ) # Node
+            ) # append
+
+        # Add optical_frame for pylon cameras.
+        color_child_frame = f'{camera_name}_color_optical_frame'
+        pylon_nodes.append(
+            Node(
+                package="tf2_ros",
+                executable="static_transform_publisher",
+                name=f"static_transform_publisher_color_{camera_name}",
+                arguments=[
+                    "--roll", "-1.57",
+                    "--yaw", "-1.57",
+                    "--frame-id", camera_name,
+                    "--child-frame-id", color_child_frame,
+                ],
+            ) # Node
+        ) # append
 
     # USB
+    pyudev_context = pyudev.Context()
     usb_nodes = []
     usb_rgb_profile_parse = parse.parse('{width}x{height}x{fps}', usb_rgb_profile)
     for serial, options in cameras.items():
@@ -203,7 +259,7 @@ def launch_setup(
         ) # append
 
 
-    return [*rs_nodes, *usb_nodes]
+    return [*rs_nodes, *pylon_nodes, *usb_nodes]
 
 def generate_launch_description():
     declared_arguments = [
@@ -270,6 +326,12 @@ def generate_launch_description():
             "rs_rgb_profile",
             default_value="960x540x60",
             description="Realsense RGB Color Profile.",
+        ),
+
+        DeclareLaunchArgument(
+            "pylon_rgb_profile",
+            default_value="960x540x60",
+            description="Basler Pylon RGB Profile.",
         ),
 
         DeclareLaunchArgument(

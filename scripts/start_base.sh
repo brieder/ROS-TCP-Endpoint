@@ -40,6 +40,9 @@ else
     source /home/void/extrinsic_calibrator/install/setup.bash
 fi
 
+# pylon
+source /workspaces/vdt/pylon_ros2_camera/install/setup.bash
+
 # VP python venv (won't work for happy)
 source /home/void/fastervoxelpose/venv/bin/activate
 

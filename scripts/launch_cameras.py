@@ -192,7 +192,17 @@ def launch_setup(
         if not options or not 'type' in options or options['type'] != 'usb':
             continue
 
-        # check options for width, height, fps, format, options override profile
+        # device overrides serial
+        if 'device' in options: 
+            video_device = options['device']
+        else:
+            video_device = None
+        if 'format' in options: 
+            format = options['format']
+        else:
+            format = 'mjpeg2rgb' # or yuyv
+
+        # width, height, fps, format, options override profile
         if 'width' in options: 
             width = options['width']
         else:
@@ -205,26 +215,27 @@ def launch_setup(
             fps = options['fps']
         else:
             fps = float(usb_rgb_profile_parse['fps'])
-        if 'format' in options: 
-            format = options['format']
-        else:
-            format = 'mjpeg2rgb' # or yuyv
         # ae / af
         # exposure
         
-        device_name = 'Serial Not Found' # will cause an error
-        for device in pyudev_context.list_devices(subsystem='video4linux', ID_SERIAL_SHORT=serial):
-            # Example: Brio has 4 devices: rgb, meta, ir, meta. RS has inconsistent order.
-            device_name = device.get('DEVNAME')
-            break
+        if video_device:
+            device_name = video_device
+        else:
+            device_name = 'Serial Not Found' # will cause an error
+            for device in pyudev_context.list_devices(subsystem='video4linux', ID_SERIAL_SHORT=serial):
+                # Example: Brio has 4 devices: rgb, meta, ir, meta. RS has inconsistent order.
+                device_name = device.get('DEVNAME')
+                break
 
         camera_name = f'C{serial}'
         usb_nodes.append(
             Node(
                 package='usb_cam', 
                 executable='usb_cam_node_exe',
-                name=camera_name, # Not right but not used really.
+
+                name='usb',
                 namespace=f'/{camera_name}/color',
+
                 #arguments=['--ros-args', '--log-level', 'debug'],
                 #parameters=[f'./configs/camera_usb_yuyv.yaml',
                 parameters=[f'./configs/camera_usb_mjpeg.yaml',
@@ -336,7 +347,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "usb_rgb_profile",
-            default_value="640x480x60",
+            default_value="960x540x30",
             description="USB RGB Color Profile.",
         ),
     ]

@@ -28,6 +28,7 @@ RUN apt-get install -y \
     ca-certificates \
     curl \
     libboost-all-dev \
+    libxcb-cursor0 \
     nano \
     nginx \
     python3-pip \

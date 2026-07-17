@@ -59,6 +59,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
+# Pylon SDK as deb for Basler cams.
+ARG PYLON_DEB=pylon_26.04.1-deb0_amd64.deb
+WORKDIR $WORKROOT
+# relative to Dockerfile (.devconatiner / host)
+COPY ../$PYLON_DEB $WORKROOT
+RUN apt install ./$PYLON_DEB && rm ./$PYLON_DEB
+
+
 # CUDA
 
 # # Need libssl1.1.1 for Cuda (which got removed)
@@ -101,6 +109,19 @@ RUN rosdep fix-permissions && \
     pip install parse pyudev
 
 #
+# Pylon / Basler Cameras
+#
+
+WORKDIR $WORKROOT
+RUN git clone -b humble https://github.com/basler/pylon-ros-camera
+WORKDIR $WORKROOT/pylon-ros-camera
+RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
+    sudo apt-get update && \
+    rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
+    colcon build && \
+    sudo rm -rf /var/lib/apt/lists/*
+
+#
 # Unity ROS-TCP-Endpoint
 #
 
@@ -110,7 +131,7 @@ WORKDIR $WORKROOT/ROS-TCP-Endpoint
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     sudo apt-get update && \
     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \
-    colcon build --symlink-install && \
+    colcon build && \
     sudo rm -rf /var/lib/apt/lists/*
 
 #

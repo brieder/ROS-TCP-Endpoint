@@ -48,7 +48,11 @@ else
 fi
 
 # pylon
-source /workspaces/vdt/pylon_ros2_camera/install/setup.bash
+if [[ -n "${VDTDEV}" || -n "${VDTDEV_PYL}" ]]; then
+    source /workspaces/vdt/pylon_ros_camera/install/setup.bash
+else
+    source /home/void/pylon_ros_camera/install/setup.bash
+fi
 
 # VP python venv (won't work for happy)
 source /home/void/fastervoxelpose/venv/bin/activate

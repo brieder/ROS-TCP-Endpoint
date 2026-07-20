@@ -49,9 +49,9 @@ fi
 
 # pylon
 if [[ -n "${VDTDEV}" || -n "${VDTDEV_PYL}" ]]; then
-    source /workspaces/vdt/pylon_ros_camera/install/setup.bash
+    source /workspaces/vdt/pylon-ros-camera/install/setup.bash
 else
-    source /home/void/pylon_ros_camera/install/setup.bash
+    source /home/void/pylon-ros-camera/install/setup.bash
 fi
 
 # VP python venv (won't work for happy)

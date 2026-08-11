@@ -14,4 +14,6 @@ source /home/void/happypose_ros/install/setup.bash
 
 export PYTHONPATH=/home/void/miniconda3/envs/happypose/lib/python3.10/site-packages:$PYTHONPATH
 
+echo $$ > /workspaces/vdt/scripts/happypose.pid
+
 ros2 run happypose_ros happypose_node  --ros-args --params-file /workspaces/vdt/configs/happypose_params.yamlx

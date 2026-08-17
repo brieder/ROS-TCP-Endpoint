@@ -19,6 +19,10 @@ from rclpy.serialization import deserialize_message
 
 from .communication import RosSender
 
+# see below
+from rosbag2_interfaces.srv import Snapshot
+from rosbag2_interfaces.srv import _snapshot
+
 
 class RosService(RosSender):
     """
@@ -52,7 +56,13 @@ class RosService(RosSender):
             service response
         """
         message_type = type(self.req)
-        message = deserialize_message(data, message_type)
+
+        # https://github.com/Unity-Technologies/Unity-Robotics-Hub/issues/390
+        message = None
+        if (isinstance(message_type, _snapshot.Metaclass_Snapshot_Request)):
+            message = Snapshot.Request()
+        else:
+            message = deserialize_message(data, message_type)
 
         if not self.cli.service_is_ready():
             self.get_logger().error(

@@ -48,6 +48,12 @@ def launch_setup(
         if not options or not 'type' in options or options['type'] != 'realsense':
             continue
 
+        # override realsense rgb profile if specified in cameras.yaml
+        if 'rs_rgb_profile' in options: 
+            ovr_rs_rgb_profile = options['rs_rgb_profile']
+        else:
+            ovr_rs_rgb_profile = rs_rgb_profile
+
         camera_name = f'C{serial}'
         params_dict = {
             'serial_no': serial,
@@ -57,7 +63,7 @@ def launch_setup(
             'depth_module.enable_auto_exposure': rs_infra_enable_ae,
             'depth_module.exposure': rs_infra_exposure,
 
-            'rgb_camera.color_profile': rs_rgb_profile,
+            'rgb_camera.color_profile': ovr_rs_rgb_profile,
             'rgb_camera.auto_exposure_priority': False,
             'rgb_camera.enable_auto_exposure': rs_rgb_enable_ae,
             'rgb_camera.exposure': rs_rgb_exposure,

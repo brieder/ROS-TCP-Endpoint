@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y \
     ros-$ROS_DISTRO-foxglove-bridge \
     ros-$ROS_DISTRO-librealsense2 \
     ros-$ROS_DISTRO-realsense2-* \
+    ros-$ROS_DISTRO-rosbag2-storage-mcap \
     ros-$ROS_DISTRO-rosbridge-suite \
     ros-$ROS_DISTRO-spinnaker-camera-driver \
     ros-$ROS_DISTRO-tf-transformations \

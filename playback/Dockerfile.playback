@@ -14,6 +14,7 @@ RUN --mount=type=secret,id=PAT \
 RUN apt-get update && apt-get install -y \
     #ros-$ROS_DISTRO-ament-cmake \
     ros-$ROS_DISTRO-foxglove-bridge \
+    ros-$ROS_DISTRO-rosbag2-storage-mcap \
     && rm -rf /var/lib/apt/lists/*
 
 # Unity TCP Connector

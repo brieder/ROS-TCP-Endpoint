@@ -1,17 +1,18 @@
-FROM ros:humble 
+FROM ros:humble
 
 ARG WORKROOT=/root
 
 ENV SHELL=/bin/bash
 
 # Azure PAT workaround because git lfs over ssh is broken on Azure.
-RUN --mount=type=secret,id=PAT \
-    TOKEN=$(sudo cat /run/secrets/PAT) && \
-    B64_TOKEN=$(printf "%s"":$TOKEN" | base64) && \
-    git config --global --add http.extraHeader "Authorization: Basic ${B64_TOKEN}"
+#RUN --mount=type=secret,id=PAT \
+#    TOKEN=$(sudo cat /run/secrets/PAT) && \
+#    B64_TOKEN=$(printf "%s"":$TOKEN" | base64) && \
+#    git config --global --add http.extraHeader "Authorization: Basic ${B64_TOKEN}"
 
 # ros packages
 RUN apt-get update && apt-get install -y \
+	openssh-client \
     #ros-$ROS_DISTRO-ament-cmake \
     ros-$ROS_DISTRO-foxglove-bridge \
     ros-$ROS_DISTRO-realsense2-* \
@@ -19,6 +20,9 @@ RUN apt-get update && apt-get install -y \
 	ros-$ROS_DISTRO-theora-image-transport \
 	ros-$ROS_DISTRO-vision-msgs \
     && rm -rf /var/lib/apt/lists/*
+
+# Add GitHub (or your Git host) to known_hosts to prevent verification errors
+RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan ssh.dev.azure.com >> ~/.ssh/known_hosts
 
 # Unity TCP Connector
 WORKDIR $WORKROOT
@@ -32,10 +36,13 @@ RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
 
 # voxelpose wrapper for msgs
 WORKDIR $WORKROOT
-RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_voxelpose_ros voxelpose_ros
+#RUN git clone https://dev.azure.com/voidvr/TheVoid/_git/vdt_voxelpose_ros voxelpose_ros
+RUN --mount=type=ssh git clone git@ssh.dev.azure.com:v3/voidvr/TheVoid/vdt_voxelpose_ros voxelpose_ros
+
 WORKDIR $WORKROOT/voxelpose_ros
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     colcon build --packages-select voxelpose_msgs
+
 # RUN sudo apt-get update && \
 #     # rosdep
 #     rosdep install -y --from-paths . --ignore-src --rosdistro $ROS_DISTRO && \

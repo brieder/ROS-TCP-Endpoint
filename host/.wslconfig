@@ -1,2 +1,5 @@
 [wsl2]
-networkingMode=mirrored
+networkingMode=Mirrored
+vmSwitch="WSL_Bridge"   
+dhcp=true
+ipv6=true

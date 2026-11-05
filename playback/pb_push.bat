@@ -1,0 +1,1 @@
+docker push voidemulator.azurecr.io/vdt-pb:latest

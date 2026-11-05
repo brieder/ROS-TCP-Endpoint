@@ -1,1 +1,1 @@
-docker build -t void/vdt-pb -f Dockerfile.playback --no-cache --ssh=default .
+./pb_build.bat --no-cache

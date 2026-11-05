@@ -47,7 +47,7 @@ class UnityTcpSender:
         self.tcp_server = tcp_server
 
         # Each sender thread has its own queue: this is always the queue for the currently active thread.
-        self.queue = None
+        self.queue = []
         self.queue_lock = threading.Lock()
 
         # variables needed for matching up unity service requests with responses
@@ -55,6 +55,10 @@ class UnityTcpSender:
         self.srv_lock = threading.Lock()
         self.services_waiting = {}
 
+    def multi_put(self, serialized_bytes):
+        for q in self.queue:
+            q.put(serialized_bytes)
+        
     def send_unity_info(self, text):
         if self.queue is not None:
             command = SysCommand_Log()
@@ -70,11 +74,11 @@ class UnityTcpSender:
             self.queue.put(serialized_bytes)
 
     def send_unity_error(self, text):
-        if self.queue is not None:
+        if len(self.queue) > 0:
             command = SysCommand_Log()
             command.text = text
             serialized_bytes = ClientThread.serialize_command("__error", command)
-            self.queue.put(serialized_bytes)
+            self.multi_put(serialized_bytes)
 
     def send_ros_service_response(self, srv_id, destination, response):
         if self.queue is not None:
@@ -85,9 +89,9 @@ class UnityTcpSender:
             self.queue.put(b"".join([serialized_header, serialized_message]))
 
     def send_unity_message(self, topic, message):
-        if self.queue is not None:
+        if len(self.queue) > 0:
             serialized_message = ClientThread.serialize_message(topic, message)
-            self.queue.put(serialized_message)
+            self.multi_put(serialized_message)
 
     def send_unity_service_request(self, topic, service_class, request):
         if self.queue is None:
@@ -133,7 +137,7 @@ class UnityTcpSender:
             return None
 
     def send_topic_list(self):
-        if self.queue is not None:
+        if len(self.queue) > 0:
             topic_list = SysCommand_TopicsResponse()
             topics_and_types = self.tcp_server.get_topic_names_and_types()
             topic_list.topics = [item[0] for item in topics_and_types]
@@ -153,7 +157,7 @@ class UnityTcpSender:
                     for item in topics_and_types
                 ]
             serialized_bytes = ClientThread.serialize_command("__topic_list", topic_list)
-            self.queue.put(serialized_bytes)
+            self.multi_put(serialized_bytes)
 
     def start_sender(self, conn, halt_event):
         sender_thread = threading.Thread(
@@ -175,7 +179,7 @@ class UnityTcpSender:
         local_queue.put(ClientThread.serialize_command("__handshake", handshake))
 
         with self.queue_lock:
-            self.queue = local_queue
+            self.queue.append(local_queue)
 
         try:
             while not halt_event.is_set():
@@ -196,8 +200,8 @@ class UnityTcpSender:
         finally:
             halt_event.set()
             with self.queue_lock:
-                if self.queue is local_queue:
-                    self.queue = None
+                if local_queue in self.queue:
+                    self.queue.remove(local_queue)
 
     def parse_message_name(self, name):
         try:
